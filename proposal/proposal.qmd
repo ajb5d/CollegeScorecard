@@ -1,0 +1,111 @@
+---
+title: "Group 5 Proposal"
+author:
+  - "Andrew Barros"
+  - "Audrika Indu"
+  - "Sivaranjani Kandasami"
+  - "Alexander Kendrick"
+format: html
+---
+
+```{r}
+#| message: false
+#| code-fold: true
+library(tidyverse)
+data <- read_csv(
+  "../data/analysis_data.csv",
+  col_types = cols(
+    UNITID = col_double(),
+    CDR3 = col_double(),
+    INSTNM = col_character(),
+    HBCU = col_double(),
+    MENONLY = col_double(),
+    WOMENONLY = col_double(),
+    RELAFFIL = col_double(),
+    DISTANCEONLY = col_double(),
+    CONTROL = col_character(),
+    LOCALE = col_character(),
+    ADM_RATE = col_double(),
+    SATVRMID = col_double(),
+    SATMTMID = col_double(),
+    SATWRMID = col_double(),
+    UGDS = col_double(),
+    TUITIONFEE_IN = col_double(),
+    TUITIONFEE_OUT = col_double(),
+    INEXPFTE = col_double(),
+    AVGFACSAL = col_double(),
+    PFTFAC = col_double(),
+    PCTPELL = col_double(),
+    PCTFLOAN = col_double(),
+    RET_FT4 = col_double(),
+    GRAD_DEBT_MDN = col_double(),
+    HIGH_CDR = col_logical(),
+    SINGLEGENDER = col_double(),
+    RELIGIOUS = col_logical()
+  )
+)
+```
+
+# Data Set
+
+Our data comes from the [US Department of Education College Scorecard](https://collegescorecard.ed.gov/), specifically the ["Most Recent Institution-Level Data" from September 14, 2022](https://ed-public-download.app.cloud.gov/downloads/Most-Recent-Cohorts-Institution_09012022.zip). The raw dataset contains 2,989 features on 6,681 institutions but we've chosen to focus on 1,990 insitutions that are:
+
+- Primarily four-year degree granting insitutions (for undergraduates)
+- The main campus only (if an overall insitutition has mulitple campuses)
+
+[This dataset is well documented](https://collegescorecard.ed.gov/data/documentation/) and [we have built a small pipeline for ingesting the raw DOE data and creating a dataset for our analysis](https://github.com/ajb5d/CollegeScorecard/blob/main/get_data.R). Our proposed dataset meets the requirements of 2.1.(b), specifically:
+
+- This data is not from the textbook
+- We have not previously used this data in class
+- None of our group members have worked with this dataset previously
+- It is not time-related data
+- It is real-world (not simulated) data
+
+# Questions of Interest
+
+## Aim 1: What influences tuition?
+
+In this aim, we will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions. 
+
+Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees for in-state students in US dollars. We hypothesize that the most important predictors will be:
+
+- `CONTROL` -- the type of insitution (public, private/non-profit, private/for-profit)
+- `LOCALE` -- the locale of the campus (categorical, nine levels from City: Large to Rural: Remote)
+- `DISTANCEONLY` -- an indicator if the insitution is online-only
+- `RELIGIOUS` -- an indicator if the institution is relgiously affiliated
+- `SINGLEGENDER` -- an indicator if the insitution is single-gender
+- `HBCU` -- an indicator if the instution is a historically Black college or university (HBCU)
+- `ADM_RATE` -- the admission rate 
+- `AVGFACSAL` -- the average faculty salary
+- `PFTFAC` -- the percentage of full-time faculty
+- `UGDS` -- the number of undergraduate degree and certificate seeking students 
+- `INEXPFTE` -- the instructional expenditures per full time student
+- `PCTPELL` -- the percentage of students recieving a Pell grant
+- `RET_FT4` -- First-time, full-time student retention rate
+
+**FIXME**: For each question, write a short paragraph to explain why the question is worth
+exploring. The more interesting, the better.
+
+## Aim 2: What is associated with having a high student loan default rate?
+
+In this aim, we will examine the factors associated with having a three-year cohort federal student loan default rate higher than 10% for main campus, four year, degree granting insitutions. 
+
+Our primary response variable is `HIGH_CDR` -- a indicator variable we created when the three year cohort default rate (CDR3) is greater than 10%. We hypothesize that the most important predictors will be:
+
+- `CONTROL` -- the type of insitution (public, private/non-profit, private/for-profit)
+- `LOCALE` -- the locale of the campus (categorical, nine levels from City: Large to Rural: Remote)
+- `DISTANCEONLY` -- an indicator if the insitution is online-only
+- `RELIGIOUS` -- an indicator if the institution is relgiously affiliated
+- `SINGLEGENDER` -- an indicator if the insitution is single-gender
+- `HBCU` -- an indicator if the instution is a historically Black college or university (HBCU)
+- `TUITIONFEE_IN`
+- `ADM_RATE` -- the admission rate 
+- `UGDS` -- the number of undergraduate degree and certificate seeking students 
+- `INEXPFTE` -- the instructional expenditures per full time student
+- `PCTPELL` -- the percentage of students recieving a Pell grant
+- `RET_FT4` -- First-time, full-time student retention rate
+- `GRAD_DEBT_MDN` -- the median debt at graduation
+- `PCTFLOAN` -- the percentage of students graduating with federal loans
+
+**FIXME**: For each question, write a short paragraph to explain why the question is worth
+exploring. The more interesting, the better.
