@@ -5,7 +5,7 @@ author:
   - "Audrika Indu"
   - "Sivaranjani Kandasami"
   - "Alexander Kendrick"
-format: html
+format: pdf
 ---
 
 ```{r}
@@ -50,62 +50,115 @@ data <- read_csv(
 
 Our data comes from the [US Department of Education College Scorecard](https://collegescorecard.ed.gov/), specifically the ["Most Recent Institution-Level Data" from September 14, 2022](https://ed-public-download.app.cloud.gov/downloads/Most-Recent-Cohorts-Institution_09012022.zip). The raw dataset contains 2,989 features on 6,681 institutions but we've chosen to focus on 1,990 insitutions that are:
 
-- Primarily four-year degree granting insitutions (for undergraduates)
-- The main campus only (if an overall insitutition has mulitple campuses)
+-   Primarily four-year degree granting insitutions (for undergraduates)
+-   The main campus only (if an overall insitutition has mulitple campuses)
 
 [This dataset is well documented](https://collegescorecard.ed.gov/data/documentation/) and [we have built a small pipeline for ingesting the raw DOE data and creating a dataset for our analysis](https://github.com/ajb5d/CollegeScorecard/blob/main/get_data.R). Our proposed dataset meets the requirements of 2.1.(b), specifically:
 
-- This data is not from the textbook
-- We have not previously used this data in class
-- None of our group members have worked with this dataset previously
-- It is not time-related data
-- It is real-world (not simulated) data
+-   This data is not from the textbook
+-   We have not previously used this data in class
+-   None of our group members have worked with this dataset previously
+-   It is not time-related data
+-   It is real-world (not simulated) data
 
 # Questions of Interest
 
-## Aim 1: What influences tuition?
+## Question of Interest 1: What influences tuition?
 
-In this aim, we will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions. 
+In this aim, we will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions.
 
 Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees for in-state students in US dollars. We hypothesize that the most important predictors will be:
 
-- `CONTROL` -- the type of insitution (public, private/non-profit, private/for-profit)
-- `LOCALE` -- the locale of the campus (categorical, nine levels from City: Large to Rural: Remote)
-- `DISTANCEONLY` -- an indicator if the insitution is online-only
-- `RELIGIOUS` -- an indicator if the institution is relgiously affiliated
-- `SINGLEGENDER` -- an indicator if the insitution is single-gender
-- `HBCU` -- an indicator if the instution is a historically Black college or university (HBCU)
-- `ADM_RATE` -- the admission rate 
-- `AVGFACSAL` -- the average faculty salary
-- `PFTFAC` -- the percentage of full-time faculty
-- `UGDS` -- the number of undergraduate degree and certificate seeking students 
-- `INEXPFTE` -- the instructional expenditures per full time student
-- `PCTPELL` -- the percentage of students recieving a Pell grant
-- `RET_FT4` -- First-time, full-time student retention rate
+-   `CONTROL` -- the type of insitution (public, private/non-profit, private/for-profit)
+-   `LOCALE` -- the locale of the campus (categorical, nine levels from City: Large to Rural: Remote)
+-   `DISTANCEONLY` -- an indicator if the insitution is online-only
+-   `RELIGIOUS` -- an indicator if the institution is relgiously affiliated
+-   `SINGLEGENDER` -- an indicator if the insitution is single-gender
+-   `HBCU` -- an indicator if the instution is a historically Black college or university (HBCU)
+-   `ADM_RATE` -- the admission rate
+-   `AVGFACSAL` -- the average faculty salary
+-   `PFTFAC` -- the percentage of full-time faculty
+-   `UGDS` -- the number of undergraduate degree and certificate seeking students
+-   `INEXPFTE` -- the instructional expenditures per full time student
+-   `PCTPELL` -- the percentage of students recieving a Pell grant
+-   `RET_FT4` -- First-time, full-time student retention rate
 
-**FIXME**: For each question, write a short paragraph to explain why the question is worth
-exploring. The more interesting, the better.
+**FIXME**: For each question, write a short paragraph to explain why the question is worth exploring. The more interesting, the better.
 
-## Aim 2: What is associated with having a high student loan default rate?
 
-In this aim, we will examine the factors associated with having a three-year cohort federal student loan default rate higher than 10% for main campus, four year, degree granting insitutions. 
+## Question of Interest 2: What is associated with having a high student loan default rate?
+
+In this aim, we will examine the factors associated with having a three-year cohort federal student loan default rate higher than 10% for main campus, four year, degree granting insitutions.
 
 Our primary response variable is `HIGH_CDR` -- a indicator variable we created when the three year cohort default rate (CDR3) is greater than 10%. We hypothesize that the most important predictors will be:
 
-- `CONTROL` -- the type of insitution (public, private/non-profit, private/for-profit)
-- `LOCALE` -- the locale of the campus (categorical, nine levels from City: Large to Rural: Remote)
-- `DISTANCEONLY` -- an indicator if the insitution is online-only
-- `RELIGIOUS` -- an indicator if the institution is relgiously affiliated
-- `SINGLEGENDER` -- an indicator if the insitution is single-gender
-- `HBCU` -- an indicator if the instution is a historically Black college or university (HBCU)
-- `TUITIONFEE_IN`
-- `ADM_RATE` -- the admission rate 
-- `UGDS` -- the number of undergraduate degree and certificate seeking students 
-- `INEXPFTE` -- the instructional expenditures per full time student
-- `PCTPELL` -- the percentage of students recieving a Pell grant
-- `RET_FT4` -- First-time, full-time student retention rate
-- `GRAD_DEBT_MDN` -- the median debt at graduation
-- `PCTFLOAN` -- the percentage of students graduating with federal loans
+-   `CONTROL` -- the type of insitution (public, private/non-profit, private/for-profit)
+-   `LOCALE` -- the locale of the campus (categorical, nine levels from City: Large to Rural: Remote)
+-   `DISTANCEONLY` -- an indicator if the insitution is online-only
+-   `RELIGIOUS` -- an indicator if the institution is relgiously affiliated
+-   `SINGLEGENDER` -- an indicator if the insitution is single-gender
+-   `HBCU` -- an indicator if the instution is a historically Black college or university (HBCU)
+-   `TUITIONFEE_IN`
+-   `ADM_RATE` -- the admission rate
+-   `UGDS` -- the number of undergraduate degree and certificate seeking students
+-   `INEXPFTE` -- the instructional expenditures per full time student
+-   `PCTPELL` -- the percentage of students recieving a Pell grant
+-   `RET_FT4` -- First-time, full-time student retention rate
+-   `GRAD_DEBT_MDN` -- the median debt at graduation
+-   `PCTFLOAN` -- the percentage of students graduating with federal loans
 
-**FIXME**: For each question, write a short paragraph to explain why the question is worth
-exploring. The more interesting, the better.
+**FIXME**: For each question, write a short paragraph to explain why the question is worth exploring. The more interesting, the better.
+
+# Visualizations
+## Question of Interest 1
+```{r, echo=FALSE}
+ggplot(data, aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL))+
+  geom_point(alpha = 0.5)+
+  labs(title = "Admission Rate vs. Tuition and Control", x = "Admission Rate", y = "Tuition", color = "Control")
+```
+
+```{r, echo=FALSE}
+ggplot(data, aes( x = AVGFACSAL, y = TUITIONFEE_IN,  color = CONTROL))+
+  geom_point(alpha = 0.5)+
+  labs(title = "Admission Rate vs. Faculty Salary and Control", x = "Faculty Salary", y = "Tuition", color = "Control")
+```
+
+```{r, echo=FALSE}
+ggplot(data, aes( x = SATVRMID, y = TUITIONFEE_IN,  color = CONTROL))+
+  geom_point(alpha = 0.5)+
+  labs(title = "Admission Rate vs. Faculty Salary and Control", x = "SAT Read", y = "Tuition", color = "Control")
+```
+```{r, echo=FALSE}
+ggplot(data, aes( x = SATMTMID, y = TUITIONFEE_IN,  color = CONTROL))+
+  geom_point(alpha = 0.5)+
+  labs(x = "SAT Read", y = "Tuition", color = "Control")
+```
+
+
+## Question of Interest 2
+```{r}
+ggplot(data = data, aes(x = HIGH_CDR))+
+  geom_bar()+
+  labs(title = "High Student Loand Default",x = "High Student Loan Default", y = "Count", fill = "Control")
+```
+
+```{r}
+ggplot(data = data, aes(x = HIGH_CDR, fill = factor(HBCU)))+
+  geom_bar()+
+  labs(title = "High Student Loand Defaults for HBCUs", x = "High Student Loan Default", y = "Count", fill = "HBCU")
+```
+
+```{r}
+ggplot(data = data, aes(x = HIGH_CDR, y = GRAD_DEBT_MDN, fill = CONTROL))+
+  geom_boxplot()+
+  labs(title = "Student Debt at Grad vs. High Student Loan Default and Control",x = "High Student Loan Default", y = "Graduation Debt", fill = "Control")
+```
+
+```{r}
+ggplot(data = data, aes(x = HIGH_CDR, y = SATMTMID, fill = CONTROL))+
+  geom_boxplot()+
+  labs(title = "Student Debt at Grad vs. Undergrads and Control",x = "High Student Loan Default", y = "Undergrads", fill = "Control")
+```
+
+
+
