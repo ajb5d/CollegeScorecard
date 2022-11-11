@@ -5,13 +5,14 @@ author:
   - "Audrika Indu"
   - "Sivaranjani Kandasami"
   - "Alexander Kendrick"
-format: pdf
+format: html
 ---
 
 ```{r}
 #| message: false
 #| code-fold: true
 library(tidyverse)
+
 data <- read_csv(
   "../data/analysis_data.csv",
   col_types = cols(
@@ -83,8 +84,18 @@ Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees f
 -   `PCTPELL` -- the percentage of students recieving a Pell grant
 -   `RET_FT4` -- First-time, full-time student retention rate
 
-**FIXME**: For each question, write a short paragraph to explain why the question is worth exploring. The more interesting, the better.
+The cost of attending college is one of the main concerns for high school students planning for undergraduate studies. Tuition and fees have significantly increased over the past decade which resulted in increased student debts. Student loans: 
 
+* Total $1.75 trillion in student loan debt (including federal and private loans)
+* On average, each borrower owes $28,950 
+* About 92% of all student debt are federal student loans
+* More than half (55%) of students from public four-year institutions had student loans
+
+With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice. 
+
+References:
+https://studentloanhero.com/featured/undergrad-worries-survey/
+https://educationdata.org/student-loan-debt-crisis
 
 ## Question of Interest 2: What is associated with having a high student loan default rate?
 
@@ -109,69 +120,115 @@ Our primary response variable is `HIGH_CDR` -- a indicator variable we created w
 
 **FIXME**: For each question, write a short paragraph to explain why the question is worth exploring. The more interesting, the better.
 
-College tuition  fees is one of the main concerns for high school students planning for under graduate studies. Tuition fees has significantly increased in the past decade which resulted in increased student debts. 
-* 		$1.75 trillion in total student loan debt (including federal and private loans)
-* 		$28,950 owed per borrower on average
-* 		About 92% of all student debt are federal student loans; the remaining amount is private student loans
-* 		55% of students from public four-year institutions had student loans
 
-With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice. 
 
-References:
-https://studentloanhero.com/featured/undergrad-worries-survey/
-https://educationdata.org/student-loan-debt-crisis
+
 
 
 # Visualizations
-## Question of Interest 1
+## Aim 1: Tuition Cost
 ```{r, echo=FALSE}
-ggplot(data, aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL))+
-  geom_point(alpha = 0.5)+
-  labs(title = "Admission Rate vs. Tuition and Control", x = "Admission Rate", y = "Tuition", color = "Control")
+data %>%
+  select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Admission Rate vs. Tuition and Insitution Type",
+      x = "Admission Rate",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
 ```
 
 ```{r, echo=FALSE}
-ggplot(data, aes( x = AVGFACSAL, y = TUITIONFEE_IN,  color = CONTROL))+
-  geom_point(alpha = 0.5)+
-  labs(title = "Admission Rate vs. Faculty Salary and Control", x = "Faculty Salary", y = "Tuition", color = "Control")
+data %>%
+  select(AVGFACSAL, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = AVGFACSAL, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_dollar()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Average Faculty Salary by Insitution Type",
+      x = "Average Faculty Salary (USD per month)",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
 ```
 
 ```{r, echo=FALSE}
-ggplot(data, aes( x = SATVRMID, y = TUITIONFEE_IN,  color = CONTROL))+
-  geom_point(alpha = 0.5)+
-  labs(title = "Admission Rate vs. Faculty Salary and Control", x = "SAT Read", y = "Tuition", color = "Control")
-```
-```{r, echo=FALSE}
-ggplot(data, aes( x = SATMTMID, y = TUITIONFEE_IN,  color = CONTROL))+
-  geom_point(alpha = 0.5)+
-  labs(x = "SAT Read", y = "Tuition", color = "Control")
+
+data %>%
+  select(SATVRMID:SATWRMID, TUITIONFEE_IN, CONTROL) %>%
+  pivot_longer(SATVRMID:SATWRMID) %>%
+  mutate(name = case_when(
+    name == "SATVRMID" ~ "Verbal",
+    name == "SATMTMID" ~ "Math",
+    name == "SATWRMID" ~ "Writing",
+  )) %>%
+  filter(!is.na(value), !is.na(TUITIONFEE_IN)) %>% 
+  ggplot(aes(x = value, y = TUITIONFEE_IN, color = CONTROL)) + 
+    geom_point(alpha = 0.5) +
+    scale_y_continuous(labels = scales::label_dollar()) +
+    labs(
+      title = "Median SAT Score vs In-State Tuition by Insitution Type",
+      y = "In-State Tutition",
+      y = "Median SAT Score by Section", 
+      color = "Institution Type"
+    ) + 
+    facet_wrap(~name) +
+    theme_bw() + 
+    theme(legend.position='bottom')
 ```
 
 
 ## Question of Interest 2
+
 ```{r}
-ggplot(data = data, aes(x = HIGH_CDR))+
-  geom_bar()+
-  labs(title = "High Student Loand Default",x = "High Student Loan Default", y = "Count", fill = "Control")
+#| echo: false
+
+data %>%
+  filter(!is.na(HIGH_CDR)) %>%
+  ggplot(aes(x = HIGH_CDR)) +
+    geom_bar() +
+    labs(title = "High Student Loand Default",
+         x = "High Student Loan Default",
+         y = "Count",
+         fill = "Control") +
+    theme_bw()
 ```
 
 ```{r}
-ggplot(data = data, aes(x = HIGH_CDR, fill = factor(HBCU)))+
-  geom_bar()+
-  labs(title = "High Student Loand Defaults for HBCUs", x = "High Student Loan Default", y = "Count", fill = "HBCU")
+#| echo: false
+data %>%
+  filter(!is.na(TUITIONFEE_IN), !is.na(UGDS), !is.na(HIGH_CDR)) %>%
+  ggplot() +
+    geom_violin(aes(HIGH_CDR, UGDS, fill = HIGH_CDR)) +
+    scale_y_continuous(labels = scales::label_comma(), trans = "log10") +
+    labs(x = "High Student Loan Default",
+         y = "Undergraduate Population Size",
+         color = NULL) + 
+    facet_wrap(~CONTROL) +
+    guides(fill = 'none') + 
+    theme_bw()
 ```
+
 
 ```{r}
-ggplot(data = data, aes(x = HIGH_CDR, y = GRAD_DEBT_MDN, fill = CONTROL))+
-  geom_boxplot()+
-  labs(title = "Student Debt at Grad vs. High Student Loan Default and Control",x = "High Student Loan Default", y = "Graduation Debt", fill = "Control")
+#| echo: false
+data %>%
+  filter(!is.na(HIGH_CDR), !is.na(GRAD_DEBT_MDN)) %>%
+  ggplot(aes(x = HIGH_CDR, y = GRAD_DEBT_MDN, fill = CONTROL)) +
+  geom_violin() +
+  scale_y_continuous(labels = scales::label_dollar()) +
+  labs(title = "Student Debt at Grad vs. High Student Loan Default and Control",
+       x = "High Student Loan Default",
+       y = "Median Graduation Debt",
+       fill = "Control") +
+  theme_bw()
 ```
-
-```{r}
-ggplot(data = data, aes(x = HIGH_CDR, y = SATMTMID, fill = CONTROL))+
-  geom_boxplot()+
-  labs(title = "Student Debt at Grad vs. Undergrads and Control",x = "High Student Loan Default", y = "Undergrads", fill = "Control")
-```
-
 
 
