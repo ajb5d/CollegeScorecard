@@ -109,6 +109,19 @@ Our primary response variable is `HIGH_CDR` -- a indicator variable we created w
 
 **FIXME**: For each question, write a short paragraph to explain why the question is worth exploring. The more interesting, the better.
 
+College tuition  fees is one of the main concerns for high school students planning for under graduate studies. Tuition fees has significantly increased in the past decade which resulted in increased student debts. 
+* 		$1.75 trillion in total student loan debt (including federal and private loans)
+* 		$28,950 owed per borrower on average
+* 		About 92% of all student debt are federal student loans; the remaining amount is private student loans
+* 		55% of students from public four-year institutions had student loans
+
+With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice. 
+
+References:
+https://studentloanhero.com/featured/undergrad-worries-survey/
+https://educationdata.org/student-loan-debt-crisis
+
+
 # Visualizations
 ## Question of Interest 1
 ```{r, echo=FALSE}
