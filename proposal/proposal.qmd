@@ -84,7 +84,7 @@ Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees f
 -   `PCTPELL` -- the percentage of students recieving a Pell grant
 -   `RET_FT4` -- First-time, full-time student retention rate
 
-The cost of attending college is one of the main concerns for high school students planning for undergraduate studies. Tuition and fees have significantly increased over the past decade which resulted in increased student debts. Student loans: 
+The cost of attending college is one of the main concerns for high school students planning for undergraduate studies. Tuition and fees have significantly increased over the past decade which resulted in increased student debts and an increase in student loans: 
 
 * Total $1.75 trillion in student loan debt (including federal and private loans)
 * On average, each borrower owes $28,950 
@@ -118,15 +118,10 @@ Our primary response variable is `HIGH_CDR` -- a indicator variable we created w
 -   `GRAD_DEBT_MDN` -- the median debt at graduation
 -   `PCTFLOAN` -- the percentage of students graduating with federal loans
 
-**FIXME**: For each question, write a short paragraph to explain why the question is worth exploring. The more interesting, the better.
-
-
-
-
-
+As tuition costs and student loans increase a key factor in a student deciding if they will attend college is whether they will see a return on their investment. I high student loan default rate can indicate that students aren't receiving an adequate career return on their investment after attending college. It is important to determine what factors influence loan repayment so that colleges and students can analyze what will allow them to get the most out of their education.
 
 # Visualizations
-## Aim 1: Tuition Cost
+## Question of Interest 1: What Influences Tuition Cost?
 ```{r, echo=FALSE}
 data %>%
   select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
@@ -185,7 +180,7 @@ data %>%
 ```
 
 
-## Question of Interest 2
+## Question of Interest 2: What is associated with having a high student loan default rate?
 
 ```{r}
 #| echo: false
