@@ -189,7 +189,7 @@ data %>%
   filter(!is.na(HIGH_CDR)) %>%
   ggplot(aes(x = HIGH_CDR)) +
     geom_bar() +
-    labs(title = "High Student Loand Default",
+    labs(title = "High Student Loan Default",
          x = "High Student Loan Default",
          y = "Count",
          fill = "Control") +
@@ -203,7 +203,8 @@ data %>%
   ggplot() +
     geom_violin(aes(HIGH_CDR, UGDS, fill = HIGH_CDR)) +
     scale_y_continuous(labels = scales::label_comma(), trans = "log10") +
-    labs(x = "High Student Loan Default",
+    labs(title = "Undergrad Population Size vs. High Student Loan Default Rate and Control",
+         x = "High Student Loan Default",
          y = "Undergraduate Population Size",
          color = NULL) + 
     facet_wrap(~CONTROL) +
