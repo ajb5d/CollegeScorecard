@@ -1,0 +1,25 @@
+project:
+  type: book
+
+book:
+  title: "Group 5: College Tuition"
+  author:
+    - "Andrew Barros"
+    - "Audrika Indu"
+    - "Sivaranjani Kandasami"
+    - "Alexander Kendrick"
+  date: "12/14/2022"
+  chapters:
+    - index.qmd
+    - ch_02_data_description.qmd
+    - ch_03_linear_regression.qmd
+    - ch_04_logistic_regression.qmd
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+
+
