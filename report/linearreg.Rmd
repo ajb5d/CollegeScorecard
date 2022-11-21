@@ -1,0 +1,198 @@
+---
+title: "Linear Regression"
+author: "Andrew Barrios, Audrika Indu, Sivaranjani Kandasami, Alex Kendrick"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+data <- read_csv(
+  "../data/analysis_data.csv",
+  col_types = cols(
+    UNITID = col_double(),
+    CDR3 = col_double(),
+    INSTNM = col_character(),
+    HBCU = col_double(),
+    MENONLY = col_double(),
+    WOMENONLY = col_double(),
+    RELAFFIL = col_double(),
+    DISTANCEONLY = col_double(),
+    CONTROL = col_character(),
+    LOCALE = col_character(),
+    ADM_RATE = col_double(),
+    SATVRMID = col_double(),
+    SATMTMID = col_double(),
+    SATWRMID = col_double(),
+    UGDS = col_double(),
+    TUITIONFEE_IN = col_double(),
+    TUITIONFEE_OUT = col_double(),
+    INEXPFTE = col_double(),
+    AVGFACSAL = col_double(),
+    PFTFAC = col_double(),
+    PCTPELL = col_double(),
+    PCTFLOAN = col_double(),
+    RET_FT4 = col_double(),
+    GRAD_DEBT_MDN = col_double(),
+    HIGH_CDR = col_logical(),
+    SINGLEGENDER = col_double(),
+    RELIGIOUS = col_logical()
+  )
+)
+data$HBCU <- factor(data$HBCU)
+data$MENONLY <- factor(data$MENONLY)
+data$WOMENONLY <- factor(data$WOMENONLY)
+data$DISTANCEONLY <- factor(data$DISTANCEONLY)
+data$CONTROL <- factor(data$CONTROL)
+data$LOCALE <- factor(data$LOCALE)
+data$HIGH_CDR <- factor(data$HIGH_CDR)
+data$RELIGIOUS <- factor(data$RELIGIOUS)
+```
+
+```{r, include=FALSE}
+# Condense Locales to City, Rural, Suburb, and Town
+levels(data$LOCALE) <- c("City", "City", "City", "Rural", "Rural", "Rural", "Suburb", "Suburb", "Suburb", "Town", "Town", "Town")
+```
+
+## Introduction
+The question for linear regression is what factors influence in-state tuition at U.S. universities. We will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions.
+
+Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees for in-state students in US dollars.
+
+The cost of attending college is one of the main concerns for high school students planning for undergraduate studies. Tuition and fees have significantly increased over the past decade which resulted in increased student debts and an increase in student loans: 
+
+* Total $1.75 trillion in student loan debt (including federal and private loans)
+* On average, each borrower owes $28,950 
+* About 92% of all student debt are federal student loans
+* More than half (55%) of students from public four-year institutions had student loans
+
+With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice. 
+
+References:
+https://studentloanhero.com/featured/undergrad-worries-survey/
+https://educationdata.org/student-loan-debt-crisis
+
+## Data Visualizations
+
+```{r, echo=FALSE}
+pairs(data[,c("TUITIONFEE_IN","ADM_RATE","SATVRMID","SATMTMID","SATWRMID","UGDS")], lower.panel = NULL)
+```
+
+```{r, echo=FALSE}
+pairs(data[,c("TUITIONFEE_IN","INEXPFTE","AVGFACSAL","PFTFAC","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], lower.panel = NULL)
+```
+
+```{r, echo=FALSE}
+data %>%
+  select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Admission Rate vs. Tuition and Insitution Type",
+      x = "Admission Rate",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+```
+
+```{r, echo=FALSE}
+
+data %>%
+  select(SATVRMID:SATWRMID, TUITIONFEE_IN, CONTROL) %>%
+  pivot_longer(SATVRMID:SATWRMID) %>%
+  mutate(name = case_when(
+    name == "SATVRMID" ~ "Verbal",
+    name == "SATMTMID" ~ "Math",
+    name == "SATWRMID" ~ "Writing",
+  )) %>%
+  filter(!is.na(value), !is.na(TUITIONFEE_IN)) %>% 
+  ggplot(aes(x = value, y = TUITIONFEE_IN, color = CONTROL)) + 
+    geom_point(alpha = 0.5) +
+    scale_y_continuous(labels = scales::label_dollar()) +
+    labs(
+      title = "Median SAT Score vs In-State Tuition by Insitution Type",
+      y = "In-State Tutition",
+      y = "Median SAT Score by Section", 
+      color = "Institution Type"
+    ) + 
+    facet_wrap(~name) +
+    theme_bw() + 
+    theme(legend.position='bottom')
+```
+
+
+```{r, echo=FALSE}
+data %>%
+  select(ADM_RATE, TUITIONFEE_IN, CONTROL, RELIGIOUS) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Admission Rate vs. Tuition and Insitution Type",
+      x = "Admission Rate",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+```
+
+```{r, echo=FALSE}
+data %>%
+  select(AVGFACSAL, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = AVGFACSAL, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_dollar()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Average Faculty Salary by Insitution Type",
+      x = "Average Faculty Salary (USD per month)",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+```
+
+```{r, echo=FALSE}
+data %>%
+  select(PFTFAC, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = PFTFAC, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Percentage Full Time Faculty",
+      x = "Percentage Full Time Faculty",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+```
+
+```{r, echo=FALSE}
+data %>%
+  select(UGDS, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = UGDS, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous() + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Average Faculty Salary by Insitution Type",
+      x = "Undergraduate Students",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+```
+
+
+
+## Model Building
+
+## Conclusions
+
