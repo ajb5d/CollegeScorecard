@@ -1,0 +1,18 @@
+# Linear Regression
+
+## Introduction
+
+
+## Visualizations
+
+## Model Building
+
+### Initial Model
+
+### Improved Model
+
+### Recommended Model
+
+### Regression Assumptions and Influential Points
+
+## Conclusions

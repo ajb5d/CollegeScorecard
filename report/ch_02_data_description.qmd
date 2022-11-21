@@ -1,0 +1,12 @@
+# Data Description
+
+## Data Source
+Our data comes from the [US Department of Education College Scorecard](https://collegescorecard.ed.gov/), specifically the ["Most Recent Institution-Level Data" from September 14, 2022](https://ed-public-download.app.cloud.gov/downloads/Most-Recent-Cohorts-Institution_09012022.zip). The raw dataset contains 2,989 features on 6,681 institutions but we've chosen to focus on 1,990 institutions that are:
+
+-   Primarily four-year degree granting institutions (for undergraduates)
+-   The main campus only (if an overall insitutition has mulitple campuses)
+
+[This dataset is well documented](https://collegescorecard.ed.gov/data/documentation/) and [we have built a small pipeline for ingesting the raw DOE data and creating a dataset for our analysis](https://github.com/ajb5d/CollegeScorecard/blob/main/get_data.R). 
+
+## Variables
+
