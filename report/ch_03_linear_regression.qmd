@@ -1,3 +1,5 @@
+# Linear Regression
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -42,13 +44,11 @@ data$CONTROL <- factor(data$CONTROL)
 data$LOCALE <- factor(data$LOCALE)
 data$HIGH_CDR <- factor(data$HIGH_CDR)
 data$RELIGIOUS <- factor(data$RELIGIOUS)
-```
 
-```{r, include=FALSE}
 # Condense Locales to City, Rural, Suburb, and Town
 levels(data$LOCALE) <- c("City", "City", "City", "Rural", "Rural", "Rural", "Suburb", "Suburb", "Suburb", "Town", "Town", "Town")
 ```
-# Linear Regression
+
 
 ## Introduction
 The question for linear regression is what factors influence in-state tuition at U.S. universities. We will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions.
