@@ -1,12 +1,82 @@
 # Data Description
+```{r setup, include=FALSE}
+#| message: false
+ 
+source("load_data.R")
+library(glue)
+
+descriptions <- list(
+  "UNITID" = "Department of Education assigned identifier.",
+  "CDR3" = "The 3-year cohort default rate.  The 3-year cohort default rate is the percentage of a school's borrowers who enter repayment on certain Federal Family Education Loan (FFEL) Program or William D. Ford Federal Direct Loan (Direct Loan) Program loans during a particular federal fiscal year (FY), October 1 to September 30, and default or meet other specified conditions prior to the end of the second following fiscal year. Reported as a proportion ([0-1]).",
+  "INSTNM" = "The name of the institution.",
+  "HBCU" = "Self reported status as Historicaly Black College or University (HBCU). Reported as a 0/1 indicator",
+  "MENONLY" = "Institution only enrolls men. Reported as 0/1 indicator",
+  "WOMENONLY" = "Institution only enrolls women. Reported as 0/1 indicator",
+  "RELAFFIL" = "Reported religious affiliation of the insitution. Reported as a categorical value:
+    - -1 (Not Reported)
+    - -2 (Not Applicable)
+    - Positive integer (indicates type of affilation, details in data dictionary).",
+  "DISTANCEONLY" = "Insitution exlusively provides distance-only education. Reported as 0/1 indicator.",
+  "CONTROL" = "Control of Institution. Reported as a categorical value:
+    - 1 Public)
+    - 2 Private, Non-Profit
+    - 3 (Proprietary)",
+  "LOCALE" = "Locate of Instutution. Reported as a categorical value:
+  
+  - 11	City: Large (population of 250,000 or more)
+  - 12	City: Midsize (population of at least 100,000 but less than 250,000)
+  - 13	City: Small (population less than 100,000)
+  - 21	Suburb: Large (outside principal city, in urbanized area with population of 250,000 or more)
+  - 22	Suburb: Midsize (outside principal city, in urbanized area with population of at least 100,000 but less than 250,000)
+  - 23	Suburb: Small (outside principal city, in urbanized area with population less than 100,000)
+  - 31	Town: Fringe (in urban cluster up to 10 miles from an urbanized area)
+  - 32	Town: Distant (in urban cluster more than 10 miles and up to 35 miles from an urbanized area)
+  - 33	Town: Remote (in urban cluster more than 35 miles from an urbanized area)
+  - 41	Rural: Fringe (rural territory up to 5 miles from an urbanized area or up to 2.5 miles from an urban cluster)
+  - 42	Rural: Distant (rural territory more than 5 miles but up to 25 miles from an urbanized area or more than 2.5 and up to 10 miles from an urban cluster)
+  - 43	Rural: Remote (rural territory more than 25 miles from an urbanized area and more than 10 miles from an urban cluster)",
+  "ADM_RATE" =  "The admission rate. This is the number of undergraduate applicants who are offerred admission divided by the total number of undergraduates who applied in the Fall. Reported as a precentage ([0-1])",
+  "SATVRMID" = "Median SAT Verbal Subsection Score for Admitted Students. Reported as an integer.",
+  "SATMTMID" = "Median SAT Math Subsection Score for Admitted Students. Reported as an integer.",
+  "SATWRMID" = "Median SAT Writing Subsection Score for Admitted Students. Reported as an integer.",
+  "UGDS" =  "The number of undergraduate degree and certificate seeking students. Reported as an integer.",
+  "TUITIONFEE_IN" = "Total tuition and required feeds for in-state students. Reported in dollars.",
+  "TUITIONFEE_OUT" = "Total tuition and required feeds for out-of-state students. Reported in dollars.",
+  "INEXPFTE" = "Instructional expenditures per full time equivalent student. Reported in dollars.",
+  "AVGFACSAL" = "Average faculty salary per month. Computed by dividing the total salary outlays by the number of months worked for all full-time, nonmedical instructional staff. Reported in dollars.",
+  "PFTFAC" = "Proportion of faculty that are employed full-time. Reported as a proportion([0-1]).",
+  "PCTPELL" = "Proportion of undergraduates who recieved a Pell grant in that academic year. Reported as a proportion ([0-1]).",
+  "PCTFLOAN" =  "Proportion of undergraduates who recieved a federal student loan in that academic year. Reported as a proportion ([0-1]).",
+  "RET_FT4" = "Proportion of full-time, first-time, degree/certificate-seeking undergraduates who were enrolled at the institution in the fall 1 year after starting at the institution. Reported as a proportion ([0-1]).",
+  "GRAD_DEBT_MDN" = "Median debt at graduation for students who complete their program. Reported in dollars.",
+  "HIGH_CDR" = "(Derived) Indicator variable for schools with a > 10% 3 year-default rate(`CDR3 > 0.1`)",
+  "SINGLEGENDER" = "(Derived) Indicator variable for schools with a single gender (`MENONLY = 1 OR WOMENONLY = 1`)",
+  "RELIGIOUS" = "(Derived) Indicator variable for schools with a religious affiliation (`RELAFFIL > 0`)"
+)
+```
 
 ## Data Source
 Our data comes from the [US Department of Education College Scorecard](https://collegescorecard.ed.gov/), specifically the ["Most Recent Institution-Level Data" from September 14, 2022](https://ed-public-download.app.cloud.gov/downloads/Most-Recent-Cohorts-Institution_09012022.zip). The raw dataset contains 2,989 features on 6,681 institutions but we've chosen to focus on 1,990 institutions that are:
 
 -   Primarily four-year degree granting institutions (for undergraduates)
--   The main campus only (if an overall insitutition has mulitple campuses)
+-   The main campus only (if an overall institution has multiple campuses)
 
 [This dataset is well documented](https://collegescorecard.ed.gov/data/documentation/) and [we have built a small pipeline for ingesting the raw DOE data and creating a dataset for our analysis](https://github.com/ajb5d/CollegeScorecard/blob/main/get_data.R). 
 
 ## Variables
+
+
+
+```{r}
+#| output: asis
+#| echo: false
+
+for (var in names(data)) {
+  description <- ""
+  if (!is.null(descriptions[[var]])) {
+    description <- descriptions[[var]]
+  }
+  print(glue("* `{var}`: {description}"))
+}
+```
 
