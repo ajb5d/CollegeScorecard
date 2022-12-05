@@ -1,7 +1,9 @@
 # Logistic Regression
+```{r setup, include=FALSE}
+source("load_data.R")
+```
 
 ## Introduction
-
 
 ## Visualizations
 
