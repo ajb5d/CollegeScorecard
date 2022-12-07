@@ -1,6 +1,14 @@
 # Linear Regression
 ```{r setup, include=FALSE}
+library(tidyverse)
+library(ggpubr)
 source("load_data.R")
+data$CONTROL=factor(data$CONTROL)
+data$HIGH_CDR=factor(data$HIGH_CDR)
+data$SINGLEGENDER=factor(data$SINGLEGENDER)
+levels(data$SINGLEGENDER) = c(FALSE,TRUE)
+data$RELIGIOUS=factor(data$RELIGIOUS)
+levels(data$CONTROL) = c("Private", "Private","Public")
 ```
 
 
@@ -28,11 +36,16 @@ pairs(data[,c("TUITIONFEE_IN","ADM_RATE","SATVRMID","SATMTMID","SATWRMID","UGDS"
 ```
 
 ```{r, echo=FALSE}
-pairs(data[,c("TUITIONFEE_IN","INEXPFTE","AVGFACSAL","PFTFAC","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], lower.panel = NULL)
+pairs(data[,c("TUITIONFEE_IN","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = NULL)
 ```
 
 ```{r, echo=FALSE}
-data %>%
+pairs(data[,c("TUITIONFEE_IN","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], lower.panel = NULL)
+```
+
+
+```{r, echo=FALSE}
+admscp <- data %>%
   select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
   drop_na() %>% 
   ggplot(aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL)) +
@@ -40,15 +53,59 @@ data %>%
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Admission Rate vs. Tuition and Insitution Type",
+      title = "Tuition vs. Admission Rate",
       x = "Admission Rate",
       y = "In-State Tuition",
       color = "Insitution Type"
     ) + theme_bw()
+
+ugdsscp <- data %>%
+  select(UGDS, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = UGDS, y = TUITIONFEE_IN, color = CONTROL)) +
+    scale_x_continuous() + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Undergrad Students",
+      x = "Undergrad Students",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme(axis.text.x = element_text(angle = 90))
+
+avgfacsalscp <- data %>%
+  select(AVGFACSAL, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = AVGFACSAL, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_dollar()) +
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Average Faculty Salary",
+      x = "Avg. Faculty Salary (USD per month)",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme(axis.text.x = element_text(angle = 90))
+
+pftfacscp <- data %>%
+  select(PFTFAC, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = PFTFAC, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) +
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Full Time Faculty",
+      x = "Percentage Full Time Faculty",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+
+ggarrange(admscp, ugdsscp, avgfacsalscp, pftfacscp,
+          ncol = 2, nrow = 2)
 ```
 
 ```{r, echo=FALSE}
-
 data %>%
   select(SATVRMID:SATWRMID, TUITIONFEE_IN, CONTROL) %>%
   pivot_longer(SATVRMID:SATWRMID) %>%
@@ -74,74 +131,103 @@ data %>%
 
 
 ```{r, echo=FALSE}
-data %>%
-  select(ADM_RATE, TUITIONFEE_IN, CONTROL, RELIGIOUS) %>% 
-  drop_na() %>% 
-  ggplot(aes(x = ADM_RATE, y = TUITIONFEE_IN, color = CONTROL)) +
+pctpellscp <- data %>%
+  select(PCTPELL, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = PCTPELL, y = TUITIONFEE_IN,  color = CONTROL)) +
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Admission Rate vs. Tuition and Insitution Type",
-      x = "Admission Rate",
+      title = "Tuition vs. Percent Pell Grant",
+      x = "Pell Grant Rate",
       y = "In-State Tuition",
       color = "Insitution Type"
     ) + theme_bw()
-```
 
-```{r, echo=FALSE}
-data %>%
-  select(AVGFACSAL, TUITIONFEE_IN, CONTROL) %>% 
+pctflscp <- data %>%
+  select(PCTFLOAN, TUITIONFEE_IN, CONTROL) %>% 
   drop_na() %>%
-  ggplot(., aes(x = AVGFACSAL, y = TUITIONFEE_IN,  color = CONTROL)) +
+  ggplot(., aes(x = PCTFLOAN, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Percent Student Loan",
+      x = "Student Loan Rate",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+
+retft4scp <- data %>%
+  select(RET_FT4, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = RET_FT4, y = TUITIONFEE_IN,  color = CONTROL)) +
+    scale_x_continuous(labels = scales::label_percent()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    geom_point(alpha = 0.5) +
+    labs(
+      title = "Tuition vs. Rate First Time Undergrads",
+      x = "First Time Undergrad Rate",
+      y = "In-State Tuition",
+      color = "Insitution Type"
+    ) + theme_bw()
+
+gdmfcp <- data %>%
+  select(GRAD_DEBT_MDN, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = GRAD_DEBT_MDN, y = TUITIONFEE_IN,  color = CONTROL)) +
     scale_x_continuous(labels = scales::label_dollar()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Tuition vs. Average Faculty Salary by Insitution Type",
-      x = "Average Faculty Salary (USD per month)",
+      title = "Tuition vs. Median Graduation Debt",
+      x = "Median Graduation Debt",
       y = "In-State Tuition",
       color = "Insitution Type"
+    ) + theme(axis.text.x = element_text(angle = 90))
+
+ggarrange(pctpellscp, pctflscp, retft4scp, gdmfcp,
+          ncol = 2, nrow =2)
+```
+
+```{r}
+data %>%
+  select(SINGLEGENDER, TUITIONFEE_IN, CONTROL, RELIGIOUS) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = SINGLEGENDER, y = TUITIONFEE_IN, fill = RELIGIOUS)) +
+    geom_boxplot() +
+    labs(
+      title = "Tuition vs. Single Gender and Religous Schools",
+      x = "Single Gender",
+      y = "In-State Tuition",
     ) + theme_bw()
 ```
 
-```{r, echo=FALSE}
-data %>%
-  select(PFTFAC, TUITIONFEE_IN, CONTROL) %>% 
-  drop_na() %>%
-  ggplot(., aes(x = PFTFAC, y = TUITIONFEE_IN,  color = CONTROL)) +
-    scale_x_continuous(labels = scales::label_percent()) + 
-    scale_y_continuous(labels = scales::label_dollar()) + 
-    geom_point(alpha = 0.5) +
-    labs(
-      title = "Tuition vs. Percentage Full Time Faculty",
-      x = "Percentage Full Time Faculty",
-      y = "In-State Tuition",
-      color = "Insitution Type"
-    ) + theme_bw()
-```
-
-```{r, echo=FALSE}
-data %>%
-  select(UGDS, TUITIONFEE_IN, CONTROL) %>% 
-  drop_na() %>%
-  ggplot(., aes(x = UGDS, y = TUITIONFEE_IN,  color = CONTROL)) +
-    scale_x_continuous() + 
-    scale_y_continuous(labels = scales::label_dollar()) + 
-    geom_point(alpha = 0.5) +
-    labs(
-      title = "Tuition vs. Average Faculty Salary by Insitution Type",
-      x = "Undergraduate Students",
-      y = "In-State Tuition",
-      color = "Insitution Type"
-    ) + theme_bw()
-```
 
 ## Model Building
 
 ### Initial Model
+Know we want to include interaction terms with CONTROL and other predictors. Becasue of this we know that we will not be able to rely solely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously.
+```{r, echo=FALSE}
+initmodel <- lm(TUITIONFEE_IN~SATVRMID+ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
+summary(initmodel)
+```
 
 ### Improved Model
+```{r}
+impmodel1 <- lm(TUITIONFEE_IN~SATVRMID+ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
+                  SATVRMID:CONTROL+ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
+summary(impmodel1)
+```
+
+Remove ADM_RATE
+```{r}
+impmodel2 <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
+                  SATVRMID:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
+summary(impmodel2)
+```
+
 
 ### Recommended Model
 
