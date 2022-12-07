@@ -205,7 +205,18 @@ data %>%
       y = "In-State Tuition",
     ) + theme_bw()
 ```
-
+```{r, echo=FALSE}
+data %>%
+  select(LOCALE, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = LOCALE, y = TUITIONFEE_IN, fill = CONTROL)) +
+    geom_violin() +
+    labs(
+      title = "Tuition vs. LOCALE and CONTROL",
+      x = "Locale",
+      y = "In-State Tuition",
+    ) + theme_bw()
+```
 
 ## Model Building
 
