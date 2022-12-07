@@ -1,4 +1,3 @@
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 
 data <- read_csv(
@@ -33,14 +32,12 @@ data <- read_csv(
     RELIGIOUS = col_logical()
   )
 )
-data$HBCU <- factor(data$HBCU)
-data$MENONLY <- factor(data$MENONLY)
-data$WOMENONLY <- factor(data$WOMENONLY)
-data$DISTANCEONLY <- factor(data$DISTANCEONLY)
-data$CONTROL <- factor(data$CONTROL)
-data$LOCALE <- factor(data$LOCALE)
-data$HIGH_CDR <- factor(data$HIGH_CDR)
-data$RELIGIOUS <- factor(data$RELIGIOUS)
 
-# Condense Locales to City, Rural, Suburb, and Town
-levels(data$LOCALE) <- c("City", "City", "City", "Rural", "Rural", "Rural", "Suburb", "Suburb", "Suburb", "Town", "Town", "Town")
+
+data <- data %>% mutate(
+  # Condense Locales to City, Rural, Suburb, and Town
+  LOCALE = str_extract(data$LOCALE, ".*(?=:)"),
+  # Factorize all these variables
+  across(c(HBCU, MENONLY, WOMENONLY, DISTANCEONLY, CONTROL, LOCALE, HIGH_CDR, RELIGIOUS), as_factor),
+  # Lump Private for profit and non-profit together
+  CONTROL = fct_collapse(CONTROL, "Public" = "Public", "Private" = c("Private, for-profit", "Private, non-profit")))
