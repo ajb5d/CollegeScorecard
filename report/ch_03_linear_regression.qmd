@@ -31,6 +31,8 @@ https://studentloanhero.com/featured/undergrad-worries-survey/
 https://educationdata.org/student-loan-debt-crisis
 
 ## Visualizations
+
+Some initial scatterplots across the various variables can help show provide insight to some initial relationship. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass. There are some predictors where the scatterplot looks to be creating a "C" sort of shape. We will explor those variables furhter while also including some of those categorical variables later. The most obvious relationships are between the Math, Reading, and Writing Median SAT scores. They are all positively correlated with each other. Admission Rate also looks to have a relationship with those same three variables though it is negatively correlated.
 ```{r, echo=FALSE}
 pairs(data[,c("TUITIONFEE_IN","ADM_RATE","SATVRMID","SATMTMID","SATWRMID","UGDS")], lower.panel = NULL)
 ```
@@ -43,7 +45,7 @@ pairs(data[,c("TUITIONFEE_IN","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = N
 pairs(data[,c("TUITIONFEE_IN","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], lower.panel = NULL)
 ```
 
-
+The plots below illustrate the impact of control on the relationship between various predictor variables and in-state tuition. It helps explain the "C" shape we were seeing in some of the earlier scatter plots. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private.
 ```{r, echo=FALSE}
 admscp <- data %>%
   select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
@@ -190,13 +192,13 @@ gdmfcp <- data %>%
 ggarrange(pctpellscp, pctflscp, retft4scp, gdmfcp,
           ncol = 2, nrow =2)
 ```
-
-```{r}
+From the plot below it's not obvious whether a school being single gender or religious will affect the price of in-state tuition.
+```{r, echo=FALSE}
 data %>%
   select(SINGLEGENDER, TUITIONFEE_IN, CONTROL, RELIGIOUS) %>% 
   drop_na() %>%
   ggplot(., aes(x = SINGLEGENDER, y = TUITIONFEE_IN, fill = RELIGIOUS)) +
-    geom_boxplot() +
+    geom_violin() +
     labs(
       title = "Tuition vs. Single Gender and Religous Schools",
       x = "Single Gender",
@@ -208,23 +210,25 @@ data %>%
 ## Model Building
 
 ### Initial Model
-Know we want to include interaction terms with CONTROL and other predictors. Becasue of this we know that we will not be able to rely solely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously.
+We know we want to include interaction terms with CONTROL and other predictors. Becasue of that we know that we will not be able to rely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously. These predictors are SATVRMID, AVGFACSAL, PCTPELL, RET_FT4, and CONTROL. We will also attempt to avoid predictors that are highly correlated with each other. SATMTMMID, SATWRMID, and ADM_RATE are not included because they are highly correlated with SATMTMID. PCFTLOAN was not included because it looks to be correlated with PCTPELL.
 ```{r, echo=FALSE}
-initmodel <- lm(TUITIONFEE_IN~SATVRMID+ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
+initmodel <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
 summary(initmodel)
 ```
 
 ### Improved Model
-```{r}
-impmodel1 <- lm(TUITIONFEE_IN~SATVRMID+ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
-                  SATVRMID:CONTROL+ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
+After creating the first oder model we will attempt to improve it using interaction terms with CONTROL. From the initial model based on the t-test it looks like we can likely remove RET_FT4 from the model. However we will see if there is a significant coefficient for the interaction term between RET_FT4 and CONTROL before removing it from the model.
+```{r, echo=FALSE}
+impmodel1 <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
+                  SATVRMID:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
 summary(impmodel1)
 ```
 
-Remove ADM_RATE
-```{r}
-impmodel2 <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
-                  SATVRMID:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
+Based on the Adjusted $R^2$ value it looks like our model improved by adding the interaction terms. It jumped from 0.8241 previously to 0.8601. However it looks like RET_FT4 and the interaction term between RET_FT4 and CONTROL may be insignificant based of their t-test values. To confirm this we can run a partial F-test.
+
+```{r, echo=FALSE}
+impmodel2 <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+CONTROL+
+                  SATVRMID:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL, data = data)
 summary(impmodel2)
 ```
 
