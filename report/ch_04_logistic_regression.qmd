@@ -1,17 +1,99 @@
 # Logistic Regression
 ```{r setup, include=FALSE}
 source("load_data.R")
+library(ggrepel)
+library(equatiomatic)
+
+## These predictors are based on missingness (the SAT predictors are missing ~50% of the time)
+## and percieved utility
+data <-
+  data %>% select(
+    INSTNM,
+    HIGH_CDR,
+    HBCU:ADM_RATE,
+    UGDS:GRAD_DEBT_MDN,
+    -RELAFFIL,
+    -TUITIONFEE_OUT,
+    RELIGIOUS,
+    SINGLEGENDER
+  ) %>%
+  drop_na()
+
+set.seed(0)
+train_rows <- sample.int(nrow(data))[1:floor(nrow(data) * 0.70)]
+train <- data[train_rows,]
+test <- data[-train_rows,]
 ```
 
 ## Introduction
 
 ## Visualizations
 
+```{r}
+#| echo: false
+#| fig-cap: "Proportion of schools with high default rate by observed deciles"
+data %>%
+  select(HIGH_CDR, UGDS, GRAD_DEBT_MDN, TUITIONFEE_IN, ADM_RATE, AVGFACSAL, PCTFLOAN, RET_FT4) %>%
+  pivot_longer(-HIGH_CDR) %>%
+  group_by(name) %>%
+  mutate(decile = cut_number(value, 10, labels=FALSE) %>% as_factor) %>%
+  ggplot(aes(x=decile, fill=HIGH_CDR)) + 
+    geom_bar(position = "fill", width = 1) + 
+    facet_wrap(~name) + 
+    scale_y_continuous(labels = scales::label_percent()) + 
+    coord_cartesian(expand = FALSE) +
+    labs(x = "Decile of Observed Value",
+         y = "Proportion of High Default Rate")
+```
+
+```{r}
+#| echo: false
+#| fig-cap: "Proportion of schools with high default rate by observed categorical values"
+data %>%
+  mutate(SINGLEGENDER = as_factor(SINGLEGENDER)) %>%
+  select(HIGH_CDR, HBCU:LOCALE, RELIGIOUS, SINGLEGENDER) %>%
+  pivot_longer(-HIGH_CDR) %>%
+  group_by(name) %>%
+  ggplot(aes(x=value, fill=HIGH_CDR)) + 
+    geom_bar(position = "fill", width = 1) + 
+    facet_wrap(~name, scales = "free_x") + 
+    scale_y_continuous(labels = scales::label_percent()) + 
+    coord_cartesian(expand = FALSE) +
+    labs(x = "Decile of Observed Value",
+         y = "Proportion of High Default Rate")
+```
+
 ## Model Building
+
+```{r}
+model <- glm(HIGH_CDR ~ AVGFACSAL + GRAD_DEBT_MDN + PCTFLOAN + TUITIONFEE_IN +
+               RET_FT4 + UGDS + HBCU + LOCALE + RELIGIOUS + CONTROL + 
+               SINGLEGENDER, family = binomial(), data = train)
+
+summary(model)
+```
+
+```{r, results='asis'}
+extract_eq(model)
+```
+
+```{r, results='asis'}
+extract_eq(model, coef_digits = 3, use_coefs = TRUE)
+```
+
+
 
 ### Initial Model
 
 ### Improved Model
+
+```{r}
+model_improved <- glm(HIGH_CDR ~ AVGFACSAL + RET_FT4 +  
+                        HBCU + CONTROL, family = binomial(), data = train)
+
+summary(model_improved)
+```
+
 
 ### Model Performance
 
