@@ -38,6 +38,6 @@ data <- data %>% mutate(
   # Condense Locales to City, Rural, Suburb, and Town
   LOCALE = str_extract(data$LOCALE, ".*(?=:)"),
   # Factorize all these variables
-  across(c(HBCU, MENONLY, WOMENONLY, DISTANCEONLY, CONTROL, LOCALE, HIGH_CDR, RELIGIOUS), as_factor),
+  across(c(HBCU, MENONLY, WOMENONLY, DISTANCEONLY, CONTROL, LOCALE, HIGH_CDR, RELIGIOUS, SINGLEGENDER), as_factor),
   # Lump Private for profit and non-profit together
   CONTROL = fct_collapse(CONTROL, "Public" = "Public", "Private" = c("Private, for-profit", "Private, non-profit")))
