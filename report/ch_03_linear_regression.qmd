@@ -3,12 +3,6 @@
 library(tidyverse)
 library(ggpubr)
 source("load_data.R")
-data$CONTROL=factor(data$CONTROL)
-data$HIGH_CDR=factor(data$HIGH_CDR)
-data$SINGLEGENDER=factor(data$SINGLEGENDER)
-levels(data$SINGLEGENDER) = c(FALSE,TRUE)
-data$RELIGIOUS=factor(data$RELIGIOUS)
-levels(data$CONTROL) = c("Private", "Private","Public")
 ```
 
 
@@ -34,11 +28,7 @@ https://educationdata.org/student-loan-debt-crisis
 
 Some initial scatterplots across the various variables can help show provide insight to some initial relationship. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass. There are some predictors where the scatterplot looks to be creating a "C" sort of shape. We will explor those variables furhter while also including some of those categorical variables later. The most obvious relationships are between the Math, Reading, and Writing Median SAT scores. They are all positively correlated with each other. Admission Rate also looks to have a relationship with those same three variables though it is negatively correlated.
 ```{r, echo=FALSE}
-pairs(data[,c("TUITIONFEE_IN","ADM_RATE","SATVRMID","SATMTMID","SATWRMID","UGDS")], lower.panel = NULL)
-```
-
-```{r, echo=FALSE}
-pairs(data[,c("TUITIONFEE_IN","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = NULL)
+pairs(data[,c("TUITIONFEE_IN","ADM_RATE","UGDS","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = NULL)
 ```
 
 ```{r, echo=FALSE}
@@ -106,31 +96,6 @@ pftfacscp <- data %>%
 ggarrange(admscp, ugdsscp, avgfacsalscp, pftfacscp,
           ncol = 2, nrow = 2)
 ```
-
-```{r, echo=FALSE}
-data %>%
-  select(SATVRMID:SATWRMID, TUITIONFEE_IN, CONTROL) %>%
-  pivot_longer(SATVRMID:SATWRMID) %>%
-  mutate(name = case_when(
-    name == "SATVRMID" ~ "Verbal",
-    name == "SATMTMID" ~ "Math",
-    name == "SATWRMID" ~ "Writing",
-  )) %>%
-  filter(!is.na(value), !is.na(TUITIONFEE_IN)) %>% 
-  ggplot(aes(x = value, y = TUITIONFEE_IN, color = CONTROL)) + 
-    geom_point(alpha = 0.5) +
-    scale_y_continuous(labels = scales::label_dollar()) +
-    labs(
-      title = "Median SAT Score vs In-State Tuition by Insitution Type",
-      y = "In-State Tutition",
-      y = "Median SAT Score by Section", 
-      color = "Institution Type"
-    ) + 
-    facet_wrap(~name) +
-    theme_bw() + 
-    theme(legend.position='bottom')
-```
-
 
 ```{r, echo=FALSE}
 pctpellscp <- data %>%
@@ -223,25 +188,19 @@ data %>%
 ### Initial Model
 We know we want to include interaction terms with CONTROL and other predictors. Becasue of that we know that we will not be able to rely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously. These predictors are SATVRMID, AVGFACSAL, PCTPELL, RET_FT4, and CONTROL. We will also attempt to avoid predictors that are highly correlated with each other. SATMTMMID, SATWRMID, and ADM_RATE are not included because they are highly correlated with SATMTMID. PCFTLOAN was not included because it looks to be correlated with PCTPELL.
 ```{r, echo=FALSE}
-initmodel <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
+initmodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
 summary(initmodel)
 ```
 
 ### Improved Model
 After creating the first oder model we will attempt to improve it using interaction terms with CONTROL. From the initial model based on the t-test it looks like we can likely remove RET_FT4 from the model. However we will see if there is a significant coefficient for the interaction term between RET_FT4 and CONTROL before removing it from the model.
 ```{r, echo=FALSE}
-impmodel1 <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
-                  SATVRMID:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
+impmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
+                  ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
 summary(impmodel1)
 ```
 
-Based on the Adjusted $R^2$ value it looks like our model improved by adding the interaction terms. It jumped from 0.8241 previously to 0.8601. However it looks like RET_FT4 and the interaction term between RET_FT4 and CONTROL may be insignificant based of their t-test values. To confirm this we can run a partial F-test.
 
-```{r, echo=FALSE}
-impmodel2 <- lm(TUITIONFEE_IN~SATVRMID+AVGFACSAL+PCTPELL+CONTROL+
-                  SATVRMID:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL, data = data)
-summary(impmodel2)
-```
 
 
 ### Recommended Model
