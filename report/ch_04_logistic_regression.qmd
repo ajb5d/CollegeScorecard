@@ -3,6 +3,8 @@
 source("load_data.R")
 library(ggrepel)
 library(equatiomatic)
+library(pROC)
+library(GGally)
 
 ## These predictors are based on missingness (the SAT predictors are missing ~50% of the time)
 ## and percieved utility
@@ -62,6 +64,14 @@ data %>%
     labs(x = "Decile of Observed Value",
          y = "Proportion of High Default Rate")
 ```
+```{r}
+#| warning: false
+ggpairs(data %>% select(where(is.numeric), HIGH_CDR),
+        mapping = aes(color = HIGH_CDR),
+        lower = list(continuous = wrap("points", size = 0.2)),
+        upper = list(continuous = wrap("cor", stars = FALSE, size = 2)))
+```
+
 
 ## Model Building
 
@@ -88,13 +98,22 @@ extract_eq(model, coef_digits = 3, use_coefs = TRUE)
 ### Improved Model
 
 ```{r}
-model_improved <- glm(HIGH_CDR ~ AVGFACSAL + RET_FT4 +  
-                        HBCU + CONTROL, family = binomial(), data = train)
+model_improved <- glm(HIGH_CDR ~ AVGFACSAL + RET_FT4 +  HBCU, family = binomial(), data = train)
 
 summary(model_improved)
 ```
 
 
 ### Model Performance
+In sample AUC:
 
+```{r}
+roc(HIGH_CDR ~ predict(model_improved), data = train)
+```
+
+In test AUC:
+
+```{r}
+roc(HIGH_CDR ~ predict(model_improved, test), data = test)
+```
 ## Conclusions
