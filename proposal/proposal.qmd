@@ -207,7 +207,6 @@ data %>%
     labs(title = "Undergrad Population Size vs. High Student Loan Default Rate and Control",
          x = "High Student Loan Default",
          y = "Undergraduate Population Size",
-         title = "UG Pop vs Institution Type by High Student Loan Default",
          color = NULL) + 
     facet_wrap(~CONTROL) +
     guides(fill = 'none') + 
