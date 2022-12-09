@@ -111,16 +111,33 @@ Next the explore the highly correlated measures of cost. In @fig-salary-vs-tuiti
 
 
 ## Model Building
-
+### Initial Model
 ```{r}
-model <- glm(HIGH_CDR ~ CONTROL + (AVGFACSAL + GRAD_DEBT_MDN) + PCTFLOAN + PCTPELL +
-               RET_FT4 + UGDS + HBCU + LOCALE + RELIGIOUS + ADM_RATE + 
-               SINGLEGENDER, family = binomial(), data = train)
-
-summary(model)
+#| echo: false
+model <- glm(HIGH_CDR ~ CONTROL + AVGFACSAL + GRAD_DEBT_MDN + PCTFLOAN +
+               PCTPELL + RET_FT4 + UGDS + HBCU + LOCALE + RELIGIOUS +
+               ADM_RATE + SINGLEGENDER, family = binomial(), data = train)
 ```
 
-### Initial Model
+For our initial model, we chose to include:
+
+   * `CONTROL` based on our hypothesis that private schools would have higher default rates
+   * `AVGFACSAL` based on our hypothesis and analysis of `AVGFACSAL`, `INEXPFTE`, and `TUITIONFEE_IN`. We chose `AVGFACSAL` over the other cost predictors as we felt that it was the best predictor of high default
+   * `GRAD_DEBT_MDN` based on our univariate analysis
+   * `PCTFLOAN`  based on our univariate analysis
+   * `PCTPELL` based on our univariate analysis
+   * `RET_FT4` based on our univariate analysis
+   * `UGDS`  based on our univariate analysis and hypothesis
+   * `HBCU`  based on our univariate analysis
+   * `LOCALE`  based on our univariate analysis
+   * `RELIGIOUS`  based on our univariate analysis
+   * `ADM_RATE` based on our hypothesis
+   * `SINGLEGENDER`  based on our univariate analysis
+
+```{r}
+#| echo: false
+summary(model)
+```
 
 ### Improved Model
 
