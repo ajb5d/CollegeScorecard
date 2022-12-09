@@ -8,18 +8,6 @@ library(GGally)
 
 ## These predictors are based on missingness (the SAT predictors are missing ~50% of the time)
 ## and percieved utility
-data <-
-  data %>% select(
-    INSTNM,
-    HIGH_CDR,
-    HBCU:ADM_RATE,
-    UGDS:GRAD_DEBT_MDN,
-    -RELAFFIL,
-    -TUITIONFEE_OUT,
-    RELIGIOUS,
-    SINGLEGENDER
-  ) %>%
-  drop_na()
 
 set.seed(0)
 train_rows <- sample.int(nrow(data))[1:floor(nrow(data) * 0.70)]
