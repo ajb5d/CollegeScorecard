@@ -18,9 +18,12 @@ descriptions <- list(
     - Positive integer (indicates type of affilation, details in data dictionary).",
   "DISTANCEONLY" = "Insitution exlusively provides distance-only education. Reported as 0/1 indicator.",
   "CONTROL" = "Control of Institution. Reported as a categorical value:
-    - 1 Public)
+    - 1 Public
     - 2 Private, Non-Profit
-    - 3 (Proprietary)",
+    - 3 Private, For-Profit
+  
+    We have elected to summarize this as Public vs. Private given the small number of For-Profit schools in our dataset.
+  ",
   "LOCALE" = "Locate of Instutution. Reported as a categorical value:
   
   - 11	City: Large (population of 250,000 or more)
@@ -34,8 +37,10 @@ descriptions <- list(
   - 33	Town: Remote (in urban cluster more than 35 miles from an urbanized area)
   - 41	Rural: Fringe (rural territory up to 5 miles from an urbanized area or up to 2.5 miles from an urban cluster)
   - 42	Rural: Distant (rural territory more than 5 miles but up to 25 miles from an urbanized area or more than 2.5 and up to 10 miles from an urban cluster)
-  - 43	Rural: Remote (rural territory more than 25 miles from an urbanized area and more than 10 miles from an urban cluster)",
-  "ADM_RATE" =  "The admission rate. This is the number of undergraduate applicants who are offerred admission divided by the total number of undergraduates who applied in the Fall. Reported as a precentage ([0-1])",
+  - 43	Rural: Remote (rural territory more than 25 miles from an urbanized area and more than 10 miles from an urban cluster)
+  
+  We have elected analyze this variable as City, Suburb, Town, and Rural.",
+  "ADM_RATE" =  "The admission rate. This is the number of undergraduate applicants who are offerred admission divided by the total number of undergraduates who applied in the Fall. Reported as a proportion ([0-1])",
   "SATVRMID" = "Median SAT Verbal Subsection Score for Admitted Students. Reported as an integer.",
   "SATMTMID" = "Median SAT Math Subsection Score for Admitted Students. Reported as an integer.",
   "SATWRMID" = "Median SAT Writing Subsection Score for Admitted Students. Reported as an integer.",
