@@ -4,10 +4,7 @@ source("load_data.R")
 library(ggrepel)
 library(equatiomatic)
 library(pROC)
-library(GGally)
-
-## These predictors are based on missingness (the SAT predictors are missing ~50% of the time)
-## and percieved utility
+library(ggpubr)
 
 set.seed(0)
 train_rows <- sample.int(nrow(data))[1:floor(nrow(data) * 0.70)]
@@ -17,13 +14,23 @@ test <- data[-train_rows,]
 
 ## Introduction
 
+In this section, we will examine the question "What school factors are associated with students having a high default rate?" The data  includes the three-year cohort default rate which is the proportion of students in default three years after they enter repayment. A cohort is the set of students who entered repayment in the previous federal fiscal year and default is defined as failure to pay as outlined in the promisary note for more than 365 days. We have defined a high default rate as >10%.  
+
+We chose this question because:
+  
+  * Schools with high default rates can lose access to federal aid.
+  * Students unable to repay their student loans can be saddled with a lifetime of debt that is difficult to discharge in bankruptcy.
+  
+Avoiding default requires students to either obtain employment after graduation sufficient to make payment on their loans or place their loans in defferment while they attend additional schooling. The required payment is proportional to the amount owed. Given this, we hypothesize that the schools with high default rates will tend to be larger, less competative, privately controlled, and more expensive. 
+
 ## Visualizations
 
 ```{r}
 #| echo: false
+#| label: fig-continuous-distributions
 #| fig-cap: "Proportion of schools with high default rate by observed deciles"
 data %>%
-  select(HIGH_CDR, UGDS, GRAD_DEBT_MDN, TUITIONFEE_IN, ADM_RATE, AVGFACSAL, PCTFLOAN, RET_FT4) %>%
+  select(HIGH_CDR, UGDS, GRAD_DEBT_MDN, TUITIONFEE_IN, ADM_RATE, AVGFACSAL, PCTFLOAN, PCTPELL, RET_FT4, INEXPFTE) %>%
   pivot_longer(-HIGH_CDR) %>%
   group_by(name) %>%
   mutate(decile = cut_number(value, 10, labels=FALSE) %>% as_factor) %>%
@@ -35,9 +42,18 @@ data %>%
     labs(x = "Decile of Observed Value",
          y = "Proportion of High Default Rate")
 ```
+Here we examine the distribution of several continuous variables(@fig-continuous-distributions). For each panel, we divided the observed values of our variable of interest into deciles and then display the empirical proportion of high default schools. There are several intersting observations in this figure:
+
+* *Admission Rate appears unrelated to high default rate*. Across the deciles of `ADM_RATE` the lowest 10% (i.e. most competative) and highest 10% (i.e. those schools that accept nearly all applicants) have visually similar default rates.
+* *Smaller schools have higher default rates*. Intriguingly, the highest decile of school undergraduate population (`UGDS`) has a near zero default rate while nearly 25% of smaller schools have a high default rate.
+* *Schools with a lower retention rate(`RET_FT4`) are more likely to be high default schools*. This fits with our expectations: students who don't graduate but still have loans are more likely to have trouble paying back their loans.
+* *Schools with more students on federal loans are more likely to be high default schools*. This is expected -- the denominator of the cohort default rate is the number of students who enter repayment. A school with fewer students on loans (`PCTFLOAN`) will have less students at risk of default.
+* *Schools with more students on Pell grants (`PCTPELL`) are more likely to be high default schools*. Pell grants are a means-tested federal grant program for undergraduate students and it seems reasonable that schools where more students qualify (i.e. have less resources) may have trouble paying back their loans
+* *There are several ways to assess school cost and the relationship between cost and default is complex*. Unsurprisingly, the median debt at graduation (`GRAD_DEBT_MDN`) appears strongly associated with a schools default rate but the effect is most dramatic for the highest decile only. In comparison, the average faculty salary (`AVGFACSAL`) and instructional expenditures (`INEXPFTE`, which includes faculty salaries) are inversely associated with the likelihood of a school having a high default rate and the relationships are more linear. Surprisingly, tuition (`TUITIONFEE_IN`) does not seem linearly associated with a schools default rate and the most expensive tuition schools are least likely to be high default schools. Measures of education value (such as the ratio of instructional expenditures to tuition or the ratio of graduation debt to instructional expenditures) are out of scope for this analysis.
 
 ```{r}
 #| echo: false
+#| label: fig-cat-distributions
 #| fig-cap: "Proportion of schools with high default rate by observed categorical values"
 data %>%
   mutate(SINGLEGENDER = as_factor(SINGLEGENDER)) %>%
@@ -52,41 +68,64 @@ data %>%
     labs(x = "Decile of Observed Value",
          y = "Proportion of High Default Rate")
 ```
+Next, we examine the proportion of high default schools for several categorical variables (@fig-cat-distributions). We note several important observations:
+
+* *Public and Private schools have similar risks of being a high default school*. We initially hypothesized that private schools(`CONTROL`) would be more likely to be high default schools and this is unexpected.
+* *No schools exclusively providing distance only education (`DISTANCEONLY`) has a high default rate*. However, we note that there is only a single school (Colorado State University-Global Campus) that is flagged as being exclusively distance only school -- we will need to drop this from our model.
+* *Minoritized schools (i.e. Historically Black Colleges and Universities [`HBCU`]) have a high risk of being a high default school*. There are 62 HBCUs in the data set and 48 (75%) have a high default rate. This is unexpected and requires more examination.
+* *Rural schools (`LOCALE`) are more likely to have a high default rate*. This is unexpected -- we anticipated that urban schools would be higher risk. The location of a school is almost certainly associated with the size and cost. This requires additional examination.
+* *Men's and Women's colleges have lower risk of being a high default school than coeducational schools*. This is also true when we combine men-only (`MENONLY`) and women-only (`WOMENONLY`) schools into single gender schools (`SINGLEGENDER`). 
+* *Religiously affiliated schools (`RELIGOUS`) are slightly higher risk for being a high default school*. 
+
 ```{r}
-#| warning: false
-ggpairs(data %>% select(where(is.numeric), HIGH_CDR),
-        mapping = aes(color = HIGH_CDR),
-        lower = list(continuous = wrap("points", size = 0.2)),
-        upper = list(continuous = wrap("cor", stars = FALSE, size = 2)))
+#| echo: false
+#| label: fig-salary-vs-tuition
+#| fig-cap: "Tuition and Fees vs Average Faculty Salary by Default Group and Control"
+data %>% 
+  ggplot(aes(AVGFACSAL, TUITIONFEE_IN)) + 
+    geom_point(aes(color = HIGH_CDR), size = 0.3) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) + 
+    stat_cor(label.y.npc = 0, label.x.npc = 0.35) + 
+    scale_x_continuous(labels = scales::label_dollar()) + 
+    scale_y_continuous(labels = scales::label_dollar()) + 
+    facet_wrap(~CONTROL) +
+    labs(x = "Average Faculty Salary ($/month)", y = "Tuition and Fees") + 
+    theme_bw()
 ```
+```{r}
+#| echo: false
+#| label: fig-salary-vs-instructional
+#| fig-cap: "Tuition and Fees vs Average Faculty Salary by Default Group and Control"
+data %>% 
+  ggplot(aes(AVGFACSAL, INEXPFTE)) + 
+    geom_point(aes(color = HIGH_CDR), size = 0.3) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) + 
+    stat_cor(label.y.npc = 1) + 
+    scale_x_continuous(labels = scales::label_dollar()) + 
+    scale_y_continuous(labels = scales::label_dollar(), trans = "log10") + 
+    labs(x = "Average Faculty Salary ($/month)", y = "Instructional Expeditures per FT Student") + 
+    theme_bw()
+```
+
+Next the explore the highly correlated measures of cost. In @fig-salary-vs-tuition we see that tuition and faculty salary are strongly correlated and that many of the high default schools have lower values for both. In @fig-salary-vs-instructional we see that faculty salary and instructional costs are again strongly correlated and that many of the high default schools have lower values for both. Faculty salary may be a better predictor -- there are several schools with a high default rate where the average faculty salary is less than \$60,000 (approximately the 5th percentile for our data ) per year yet the instructional expenditures are greater than \$10,000 (approximately the median value).
 
 
 ## Model Building
 
 ```{r}
-model <- glm(HIGH_CDR ~ AVGFACSAL + GRAD_DEBT_MDN + PCTFLOAN + TUITIONFEE_IN +
-               RET_FT4 + UGDS + HBCU + LOCALE + RELIGIOUS + CONTROL + 
+model <- glm(HIGH_CDR ~ CONTROL + (AVGFACSAL + GRAD_DEBT_MDN) + PCTFLOAN + PCTPELL +
+               RET_FT4 + UGDS + HBCU + LOCALE + RELIGIOUS + ADM_RATE + 
                SINGLEGENDER, family = binomial(), data = train)
 
 summary(model)
 ```
-
-```{r, results='asis'}
-extract_eq(model)
-```
-
-```{r, results='asis'}
-extract_eq(model, coef_digits = 3, use_coefs = TRUE)
-```
-
-
 
 ### Initial Model
 
 ### Improved Model
 
 ```{r}
-model_improved <- glm(HIGH_CDR ~ AVGFACSAL + RET_FT4 +  HBCU, family = binomial(), data = train)
+model_improved <- glm(HIGH_CDR ~ AVGFACSAL + RET_FT4 +  HBCU + PCTPELL + GRAD_DEBT_MDN, family = binomial(), data = train)
 
 summary(model_improved)
 ```
