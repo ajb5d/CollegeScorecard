@@ -5,6 +5,9 @@ library(ggrepel)
 library(equatiomatic)
 library(pROC)
 library(ggpubr)
+library(modelr)
+library(glue)
+library(patchwork)
 
 set.seed(0)
 train_rows <- sample.int(nrow(data))[1:floor(nrow(data) * 0.70)]
@@ -14,14 +17,14 @@ test <- data[-train_rows,]
 
 ## Introduction
 
-In this section, we will examine the question "What school factors are associated with students having a high default rate?" The data  includes the three-year cohort default rate which is the proportion of students in default three years after they enter repayment. A cohort is the set of students who entered repayment in the previous federal fiscal year and default is defined as failure to pay as outlined in the promisary note for more than 365 days. We have defined a high default rate as >10%.  
+In this section, we will examine the question "What school factors are associated with students having a high default rate?" The data  includes the three-year cohort default rate which is the proportion of students in default three years after they enter repayment. A cohort is the set of students who entered repayment in the previous federal fiscal year and default is defined as failure to pay as outlined in the promissory note for more than 365 days. We have defined a high default rate as >10%.  
 
 We chose this question because:
   
   * Schools with high default rates can lose access to federal aid.
   * Students unable to repay their student loans can be saddled with a lifetime of debt that is difficult to discharge in bankruptcy.
   
-Avoiding default requires students to either obtain employment after graduation sufficient to make payment on their loans or place their loans in defferment while they attend additional schooling. The required payment is proportional to the amount owed. Given this, we hypothesize that the schools with high default rates will tend to be larger, less competative, privately controlled, and more expensive. 
+Avoiding default requires students to either obtain employment after graduation sufficient to make payment on their loans or place their loans in deferment while they attend additional schooling. The required payment is proportional to the amount owed. Given this, we hypothesize that the schools with high default rates will tend to be larger, less competative, privately controlled, and more expensive. 
 
 ## Visualizations
 
@@ -42,9 +45,9 @@ data %>%
     labs(x = "Decile of Observed Value",
          y = "Proportion of High Default Rate")
 ```
-Here we examine the distribution of several continuous variables(@fig-continuous-distributions). For each panel, we divided the observed values of our variable of interest into deciles and then display the empirical proportion of high default schools. There are several intersting observations in this figure:
+Here we examine the distribution of several continuous variables(@fig-continuous-distributions). For each panel, we divided the observed values of our variable of interest into deciles and then display the empirical proportion of high default schools. There are several interesting observations in this figure:
 
-* *Admission Rate appears unrelated to high default rate*. Across the deciles of `ADM_RATE` the lowest 10% (i.e. most competative) and highest 10% (i.e. those schools that accept nearly all applicants) have visually similar default rates.
+* *Admission Rate appears unrelated to high default rate*. Across the deciles of `ADM_RATE` the lowest 10% (i.e. most competitive) and highest 10% (i.e. those schools that accept nearly all applicants) have visually similar default rates.
 * *Smaller schools have higher default rates*. Intriguingly, the highest decile of school undergraduate population (`UGDS`) has a near zero default rate while nearly 25% of smaller schools have a high default rate.
 * *Schools with a lower retention rate(`RET_FT4`) are more likely to be high default schools*. This fits with our expectations: students who don't graduate but still have loans are more likely to have trouble paying back their loans.
 * *Schools with more students on federal loans are more likely to be high default schools*. This is expected -- the denominator of the cohort default rate is the number of students who enter repayment. A school with fewer students on loans (`PCTFLOAN`) will have less students at risk of default.
@@ -141,23 +144,62 @@ summary(model)
 
 ### Improved Model
 
-```{r}
-model_improved <- glm(HIGH_CDR ~ AVGFACSAL + RET_FT4 +  HBCU + PCTPELL + GRAD_DEBT_MDN, family = binomial(), data = train)
+From the results above, we will attempt a reduced model with six predictors: `CONTROL`, `AVGFACSAL`, `RET_FT4`, `HBCU`, `PCTPELL`, and `GRAD_DEBT_MDN`.
 
+```{r}
+#| echo: false
+model_improved <- glm(HIGH_CDR ~ CONTROL + AVGFACSAL + RET_FT4 +  HBCU + PCTPELL + GRAD_DEBT_MDN, family = binomial(), data = train)
 summary(model_improved)
 ```
 
-
 ### Model Performance
-In sample AUC:
-
 ```{r}
-roc(HIGH_CDR ~ predict(model_improved), data = train)
-```
+#| echo: false
+#| label: fig-roc-curves
+#| fig-cap: "Test set model performance"
+roc_full <- roc(HIGH_CDR ~ predict(model, test), data = test, direction = "<", levels = c(FALSE, TRUE))
+roc_improved <- roc(HIGH_CDR ~ predict(model_improved, test), data = test, direction = "<", levels = c(FALSE, TRUE))
+fmt <- scales::label_number(accuracy=0.001)
 
-In test AUC:
+plot_txt <- "Full Model AUROC: {fmt(roc_full$auc)}
+Improved Model AUROC: {fmt(roc_improved$auc)}"
 
-```{r}
-roc(HIGH_CDR ~ predict(model_improved, test), data = test)
+roc_data <- rbind(
+  roc_full %>%
+    coords %>% 
+    mutate(specificity = 1 - specificity) %>%
+    arrange(sensitivity, specificity) %>%
+    mutate(model = "Full"),
+    roc_improved %>%
+    coords %>% 
+    mutate(specificity = 1 - specificity) %>%
+    arrange(sensitivity, specificity) %>%
+    mutate(model = "Improved"))
+
+prc_data <- rbind(
+  roc_full %>%
+    coords(ret = c("accuracy", "threshold", "precision", "recall")) %>% 
+    mutate(model = "Full"),
+    roc_improved %>%
+    coords(ret = c("accuracy", "threshold", "precision", "recall")) %>% 
+    mutate(model = "Improved"))
+
+p1 <- ggplot(roc_data) +
+  geom_step(aes(specificity, sensitivity, color = model)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  annotate("text", x = 0.50, y = 0.1, label = glue(plot_txt)) + 
+  coord_cartesian(expand = FALSE) +
+  labs(x = "1 - Specificity", y = "Sensitivity", color = "Model") +
+  theme_bw()
+
+p2 <- ggplot(prc_data) +
+  geom_step(aes(threshold, accuracy, color = model)) +
+  scale_y_continuous(limits = c(0,1), labels = scales::label_percent()) + 
+  labs(x = "Threshold (Log-odds)", y="Accuracy", color = "Model") +
+  theme_bw()
+
+(p1 + p2 + plot_layout(guides = "collect") + plot_annotation(title = "Test Set Model Performance")) & theme(legend.position="bottom")  
 ```
+The AUC (0.937 vs 0.931), ROC curves, and maximal accuracy for the two candidate models is very similar(@fig-roc-curves).
+
 ## Conclusions
