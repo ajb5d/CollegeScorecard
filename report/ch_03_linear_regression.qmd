@@ -1,4 +1,5 @@
 # Linear Regression
+
 ```{r setup, include=FALSE}
 library(MASS)
 library(tidyverse)
@@ -6,28 +7,27 @@ library(ggpubr)
 source("load_data.R")
 ```
 
-
 ## Introduction
+
 The question for linear regression is what factors influence in-state tuition at U.S. universities. We will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions.
 
 Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees for in-state students in US dollars.
 
-The cost of attending college is one of the main concerns for high school students planning for undergraduate studies. Tuition and fees have significantly increased over the past decade which resulted in increased student debts and an increase in student loans: 
+The cost of attending college is one of the main concerns for high school students planning for undergraduate studies. Tuition and fees have significantly increased over the past decade which resulted in increased student debts and an increase in student loans:
 
-* Total $1.75 trillion in student loan debt (including federal and private loans)
-* On average, each borrower owes $28,950 
-* About 92% of all student debt are federal student loans
-* More than half (55%) of students from public four-year institutions had student loans
+-   Total \$1.75 trillion in student loan debt (including federal and private loans)
+-   On average, each borrower owes \$28,950
+-   About 92% of all student debt are federal student loans
+-   More than half (55%) of students from public four-year institutions had student loans
 
-With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice. 
+With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice.
 
-References:
-https://studentloanhero.com/featured/undergrad-worries-survey/
-https://educationdata.org/student-loan-debt-crisis
+References: https://studentloanhero.com/featured/undergrad-worries-survey/ https://educationdata.org/student-loan-debt-crisis
 
 ## Visualizations
 
-Some initial scatterplots across the various variables can help show provide insight to some initial relationship. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass. There are some predictors where the scatterplot looks to be creating a "C" sort of shape. We will explor those variables furhter while also including some of those categorical variables later. The most obvious relationships are between the Math, Reading, and Writing Median SAT scores. They are all positively correlated with each other. Admission Rate also looks to have a relationship with those same three variables though it is negatively correlated.
+Some initial scatterplots across the various variables can help show provide insight to some initial relationship. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass. There are some predictors where the scatterplot looks to be creating a "C" sort of shape. We will explore those variables further while also including some of those categorical variables later. The most obvious relationships are between the Math, Reading, and Writing Median SAT scores. They are all positively correlated with each other. Admission Rate also looks to have a relationship with those same three variables though it is negatively correlated.
+
 ```{r, echo=FALSE}
 pairs(data[,c("TUITIONFEE_IN","ADM_RATE","UGDS","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = NULL)
 ```
@@ -37,6 +37,7 @@ pairs(data[,c("TUITIONFEE_IN","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], 
 ```
 
 The plots below illustrate the impact of control on the relationship between various predictor variables and in-state tuition. It helps explain the "C" shape we were seeing in some of the earlier scatter plots. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private.
+
 ```{r, echo=FALSE}
 admscp <- data %>%
   select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
@@ -158,7 +159,9 @@ gdmfcp <- data %>%
 ggarrange(pctpellscp, pctflscp, retft4scp, gdmfcp,
           ncol = 2, nrow =2)
 ```
-From the plot below it's not obvious whether a school being single gender or religious will affect the price of in-state tuition.
+
+The violin plots below compare the `TUITIONFEE_IN` against some of the categorical variables in our data: `SINGLEGENDER`, `RELIGIOULS`, and `LOCALE`. It looks like there may be some signficant difference in the distribution of `TUITIONFEE_IN` based on `SINGLE_GENDER` and `RELIGIOUS`. It's difficult to discern a major difference in `TUITIONFEE_IN` across the different levels of `LOCALE`.
+
 ```{r, echo=FALSE}
 gendviol <- data %>%
   select(SINGLEGENDER, TUITIONFEE_IN, CONTROL) %>% 
@@ -200,56 +203,63 @@ ggarrange(gendviol, relviol, locviol,
 ## Model Building
 
 ### Initial Model
+
 We know we want to include interaction terms with CONTROL and other predictors. Becasue of that we know that we will not be able to rely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously. These predictors are:
 
-  * `ADM_RATE` - based on scatter plot
-  * `AVGFACSAL` - based on scatter plot
-  * `PCTPELL` - based on scatter plot
-  * `RET_FT4` - based on scatter plot
-  * `CONTROL` - based on scatterplots and hypothesis that interaction terms will be important
+-   `ADM_RATE` - based on scatter plot
+-   `AVGFACSAL` - based on scatter plot
+-   `PCTPELL` - based on scatter plot
+-   `RET_FT4` - based on scatter plot
+-   `CONTROL` - based on scatterplots and hypothesis that interaction terms will be important
 
 `PCFTLOAN` was not included because it looks to be correlated with `PCTPELL`.
+
 ```{r, echo=FALSE}
 initmodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
 summary(initmodel)
 ```
 
 ### Improved Model
+
 After creating the initial first order model based on observations from the plots displayed earlier we will compare it to a model that contains the remaining predictors we obtained data on to ensure we weren't missing any important ones.
+
 ```{r, echo=FALSE}
 largemodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
                    PFTFAC+PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+SINGLEGENDER+LOCALE, data = data)
 summary(largemodel)
 ```
 
-The Adjusted $R^2$ metric as well as the results of the t-tests for some of coefficients for the additional predictors hint that they may be significant for our model. To confirm these additional predictors are useful we will run a partial F-test where:  
-$H_0: \beta_2 = 0$  
-$H_a: \beta_2 \neq 0$  
+The Adjusted $R^2$ metric as well as the results of the t-tests for some of coefficients for the additional predictors hint that they may be significant for our model. To confirm these additional predictors are useful we will run a partial F-test where:\
+$H_0: \beta_2 = 0$\
+$H_a: \beta_2 \neq 0$\
 where $\beta_2$ is the collection of ceofficients added in the expanded model.
 
 ```{r, echo=FALSE}
 anova(initmodel,largemodel)
 ```
-The p-value form the partial F-test is less than 0.05 indicating that the data supports rejecting the null hypothesis which indicates at least some of our additional predictors add value to the model.  
-However some of the t-tests indicate that we may be able to remove some of the predictors namely:  
-* `PFTFAC`
-* `SINGLEGENDER`
-* `LOCALE`
 
-Again, to confirm we can conduct an additional F-test. The hypothesis test remains the same as well except with $B_2$ representing the coefficients `PFTFAC`, `SINGLEGENDER`, and `LOCALE`.  
-$H_0: \beta_2 = 0$  
-$H_a: \beta_2 \neq 0$  
+The p-value form the partial F-test is less than 0.05 indicating that the data supports rejecting the null hypothesis which indicates at least some of our additional predictors add value to the model.\
+However some of the t-tests indicate that we may be able to remove some of the predictors namely:\
+\* `PFTFAC` \* `SINGLEGENDER` \* `LOCALE`
+
+Again, to confirm we can conduct an additional F-test. The hypothesis test remains the same as well except with $B_2$ representing the coefficients `PFTFAC`, `SINGLEGENDER`, and `LOCALE`.\
+$H_0: \beta_2 = 0$\
+$H_a: \beta_2 \neq 0$
+
 ```{r, echo=FALSE}
 finfirstmodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
                    PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS, data = data)
 summary(finfirstmodel)
 ```
+
 ```{r, echo=FALSE}
 anova(finfirstmodel,largemodel)
 ```
-For this partial F-test the p-value is greater than 0.05 indicating they the data does not support rejecting the null hypothesis. Which indicates that the predictors `PFTFAC`, `SINGLEGENDER`, and `LOCALE` were not significant.  
+
+For this partial F-test the p-value is greater than 0.05 indicating they the data does not support rejecting the null hypothesis. Which indicates that the predictors `PFTFAC`, `SINGLEGENDER`, and `LOCALE` were not significant.
 
 After creating a first order model we will attempt to improve it using interaction terms with CONTROL. The interaction terms were selected based off of the scatterplots shown previously.
+
 ```{r, echo=FALSE}
 intmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL
                 +UGDS+INEXPFTE+PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+
@@ -257,17 +267,19 @@ intmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL
                   RET_FT4:CONTROL, data = data)
 summary(intmodel1)
 ```
-Once again we will conduct a partial F test to determine if the additional terms in the model are significant.  
-$H_0: \beta_2 = 0$  
-$H_a: \beta_2 \neq 0$  
+
+Once again we will conduct a partial F test to determine if the additional terms in the model are significant.\
+$H_0: \beta_2 = 0$\
+$H_a: \beta_2 \neq 0$\
 where $\beta_2$ represents the coeficcients for the interaction terms.
+
 ```{r, echo=FALSE}
 anova(finfirstmodel,intmodel1)
 ```
 
-The p-value for the partial F test is less than 0.05 so the data supports rejecting the null hypothesis. This indicates that some of the interaction terms are signficant to the model.  
+The p-value for the partial F test is less than 0.05 so the data supports rejecting the null hypothesis. This indicates that some of the interaction terms are signficant to the model.
 
-The t-test indicates that the interaction term between `RET_FT4` and the indicator variable for `CONTROLPrivate` can be dropped from the model given that the rest are present. This gives us the model below. 
+The t-test indicates that the interaction term between `RET_FT4` and the indicator variable for `CONTROLPrivate` can be dropped from the model given that the rest are present. This gives us the model below.
 
 ```{r, echo=FALSE}
 intmodel2 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
@@ -277,6 +289,7 @@ summary(intmodel2)
 ```
 
 Before we determine if this is the recommended model we should assess the regression assumptions.
+
 ```{r, echo=FALSE}
 tuithat <- intmodel2$fitted.values
 res <- intmodel2$residuals
@@ -289,16 +302,20 @@ ggplot(data, aes(x=tuithat,y=res))+
   geom_hline(yintercept=0, color="red")+
   labs(x="Fitted y", y="Residuals", title="Residual Plot")
 ```
+
 The residuals look to have a mean of 0 for most of the fitted values of y but at the higher fitted values of y there looks to be an area where the mean is less then 0. In addition the variance of the residuals looks to increase as the fitted values increase. So we do not meet the first 2 regression assumptions. To attempt to correct for this we will transform the response.
 
 ```{r}
 boxcox(intmodel2, lambda = seq(-1,1,1/10))
 ```
+
 The Box-Cox plot indicates a $\lambda$ somewhat near 0. Becasue of that and to aid in interpretation we will use try using the log transformation.
+
 ```{r}
 logtuit <- log(data$TUITIONFEE_IN)
 data <- data.frame(data,logtuit)
 ```
+
 ```{r}
 logmodel <- lm(logtuit~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
                    PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+
@@ -324,28 +341,36 @@ With the log transformation on `TUITIONFEE_IN` the varaince of the residuals doe
 ```{r}
 acf(logres, main="ACF Plot of Residuals with Log Tuition")
 ```
+
 It looks like the residuals do have some correlation with eachother as at a few different lags the autocorrelation is significant. It looks like this could possibly be because the data has been sorted by the School's names.
 
 ```{r}
 qqnorm(logres)
 qqline(logres, col="red")
 ```
+
 For the most part the residuals look to follow the normal distribution, at the lower end there is some deviation.
 
 ### Recommended Model
 
-The t-test for `ADM_RATE` indicates it may be possible to remove it from the model given all other regressors are included, but it needs to remain in the model since we are including an interaction term between `ADM_RATE` and `CONTROL`. Additionally the adjusted $R^2$ for this model is higher than all of the previous models.
+The recommended model is below. It includes a log transform on the response variable to account for non-constant variation that was seen in the previous model. The t-test for `ADM_RATE`indicates that it could be removed from the model leaving in all other regressors but it needs to be included becasue there is an interaction term between `ADM_RATE` and `CONTROL` that is included in the model.
 
-Adjusted $R^2$
+```{r, echo=FALSE}
+summary(logmodel)
+```
+
+Based on both the Adjusted $R^2$ and AIC metrics the recommended model is considered the best model out of the ones we have tested.
+
+Adjusted R-squared
 
 * Initial First Order Model = 0.8013
 * First Order Model with All Terms = 0.8324
 * Final First Order Model = 0.8324
 * Model with Interaction Terms = 0.8586
 * Recommended Model = 0.8587
-* Recommended Model with Log Transform = 0.8809 
+* Recommended Model with Log Transform = 0.8809
 
-Additionally the AIC values for the models also point towards the Recommended model as the best.
+AIC
 
 ```{r,echo=FALSE}
 print(AIC(initmodel))
@@ -356,9 +381,6 @@ print(AIC(intmodel2))
 print(AIC(logmodel))
 ```
 
-
 ### Regression Assumptions and Influential Points
-
-
 
 ## Conclusions
