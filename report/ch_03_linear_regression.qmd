@@ -2,6 +2,7 @@
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(ggpubr)
+library(MASS)
 source("load_data.R")
 ```
 
@@ -159,52 +160,160 @@ ggarrange(pctpellscp, pctflscp, retft4scp, gdmfcp,
 ```
 From the plot below it's not obvious whether a school being single gender or religious will affect the price of in-state tuition.
 ```{r, echo=FALSE}
-data %>%
-  select(SINGLEGENDER, TUITIONFEE_IN, CONTROL, RELIGIOUS) %>% 
+gendviol <- data %>%
+  select(SINGLEGENDER, TUITIONFEE_IN, CONTROL) %>% 
   drop_na() %>%
-  ggplot(., aes(x = SINGLEGENDER, y = TUITIONFEE_IN, fill = RELIGIOUS)) +
+  ggplot(., aes(x = SINGLEGENDER, y = TUITIONFEE_IN)) +
     geom_violin() +
     labs(
-      title = "Tuition vs. Single Gender and Religous Schools",
+      title = "Tuition vs. Single Gender Schools",
       x = "Single Gender",
       y = "In-State Tuition",
     ) + theme_bw()
-```
-```{r, echo=FALSE}
-data %>%
-  select(LOCALE, TUITIONFEE_IN, CONTROL) %>% 
+
+relviol <- data %>%
+  select(TUITIONFEE_IN, CONTROL, RELIGIOUS) %>% 
   drop_na() %>%
-  ggplot(., aes(x = LOCALE, y = TUITIONFEE_IN, fill = CONTROL)) +
+  ggplot(., aes(x = RELIGIOUS, y = TUITIONFEE_IN)) +
     geom_violin() +
     labs(
-      title = "Tuition vs. LOCALE and CONTROL",
+      title = "Tuition vs. Religous Schools",
+      x = "Single Gender",
+      y = "In-State Tuition",
+    ) + theme_bw()
+
+locviol <- data %>%
+  select(LOCALE, TUITIONFEE_IN, CONTROL) %>% 
+  drop_na() %>%
+  ggplot(., aes(x = LOCALE, y = TUITIONFEE_IN)) +
+    geom_violin() +
+    labs(
+      title = "Tuition vs. School Locale",
       x = "Locale",
       y = "In-State Tuition",
     ) + theme_bw()
+
+ggarrange(gendviol, relviol, locviol,
+          ncol = 2, nrow =2)
 ```
 
 ## Model Building
 
 ### Initial Model
-We know we want to include interaction terms with CONTROL and other predictors. Becasue of that we know that we will not be able to rely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously. These predictors are SATVRMID, AVGFACSAL, PCTPELL, RET_FT4, and CONTROL. We will also attempt to avoid predictors that are highly correlated with each other. SATMTMMID, SATWRMID, and ADM_RATE are not included because they are highly correlated with SATMTMID. PCFTLOAN was not included because it looks to be correlated with PCTPELL.
+We know we want to include interaction terms with CONTROL and other predictors. Becasue of that we know that we will not be able to rely on the automated search procedures we've used previously. So the initial model will start off as a first order model including predictors identified from the charts shown previously. These predictors are:
+
+  * `ADM_RATE` - based on scatter plot
+  * `AVGFACSAL` - based on scatter plot
+  * `PCTPELL` - based on scatter plot
+  * `RET_FT4` - based on scatter plot
+  * `CONTROL` - based on scatterplots and hypothesis that interaction terms will be important
+
+`PCFTLOAN` was not included because it looks to be correlated with `PCTPELL`.
 ```{r, echo=FALSE}
 initmodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL, data = data)
 summary(initmodel)
 ```
 
 ### Improved Model
-After creating the first oder model we will attempt to improve it using interaction terms with CONTROL. From the initial model based on the t-test it looks like we can likely remove RET_FT4 from the model. However we will see if there is a significant coefficient for the interaction term between RET_FT4 and CONTROL before removing it from the model.
+After creating the initial first order model based on observations from the plots displayed earlier we will compare it to a model that contains the remaining predictors we obtained data on to ensure we weren't missing any important ones.
 ```{r, echo=FALSE}
-impmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+
-                  ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+RET_FT4:CONTROL, data = data)
-summary(impmodel1)
+largemodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
+                   PFTFAC+PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+SINGLEGENDER+LOCALE, data = data)
+summary(largemodel)
 ```
 
+The Adjusted $R^2$ metric as well as the results of the t-tests for some of coefficients for the additional predictors hint that they may be significant for our model. To confirm these additional predictors are useful we will run a partial F-test where:  
+$H_0: \beta_2 = 0$  
+$H_a: \beta_2 \neq 0$  
+where $\beta_2$ is the collection of ceofficients added in the expanded model.
 
+```{r, echo=FALSE}
+anova(initmodel,largemodel)
+```
+The p-value form the partial F-test is less than 0.05 indicating that the data supports rejecting the null hypothesis which indicates at least some of our additional predictors add value to the model.  
+However some of the t-tests indicate that we may be able to remove some of the predictors namely:  
+* `PFTFAC`
+* `SINGLEGENDER`
+* `LOCALE`
+
+Again, to confirm we can conduct an additional F-test. The hypothesis test remains the same as well except with $B_2$ representing the coefficients `PFTFAC`, `SINGLEGENDER`, and `LOCALE`.  
+$H_0: \beta_2 = 0$  
+$H_a: \beta_2 \neq 0$  
+```{r, echo=FALSE}
+finfirstmodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
+                   PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS, data = data)
+summary(finfirstmodel)
+```
+```{r, echo=FALSE}
+anova(finfirstmodel,largemodel)
+```
+For this partial F-test the p-value is greater than 0.05 indicating they the data does not support rejecting the null hypothesis. Which indicates that the predictors `PFTFAC`, `SINGLEGENDER`, and `LOCALE` were not significant.  
+
+After creating a first order model we will attempt to improve it using interaction terms with CONTROL. The interaction terms were selected based off of the scatterplots shown previously.
+```{r, echo=FALSE}
+intmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL
+                +UGDS+INEXPFTE+PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+
+                  ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL+
+                  RET_FT4:CONTROL, data = data)
+summary(intmodel1)
+```
+Once again we will conduct a partial F test to determine if the additional terms in the model are significant.
+```{r, echo=FALSE}
+anova(finfirstmodel,intmodel1)
+```
+
+The p-value for the partial F test is less than 0.05 so the data supports rejecting the null hypothesis. This indicates that some of the interaction terms are signficant to the model.  
+
+The t-test indicates that the interaction term between `RET_FT4` and the indicator variable for `CONTROLPrivate` can be dropped from the model given that the rest are present. This gives us the model below. 
+
+```{r, echo=FALSE}
+intmodel2 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
+                   PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+
+                  ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL, data = data)
+summary(intmodel2)
+```
+
+Before we determine if this is the recommended model we should assess the regression assumptions.
+```{r, echo=FALSE}
+tuithat <- intmodel2$fitted.values
+res <- intmodel2$residuals
+data <- data.frame(data,tuithat,res)
+```
+
+```{r, echo=FALSE}
+ggplot(data, aes(x=tuithat,y=res))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot")
+```
+The residuals look to have a mean of 0 for most of the fitted values of y but at the higher fitted values of y there looks to be an area where the mean is less then 0. In addition the variance of the residuals looks to increase as the fitted values increase. So we do not meet the first 2 regression assumptions. To attempt to correct for this we will transform the response.
 
 
 ### Recommended Model
 
+The t-test for `ADM_RATE` indicates it may be possible to remove it from the model given all other regressors are included, but it needs to remain in the model since we are including an interaction term between `ADM_RATE` and `CONTROL`. Additionally the adjusted $R^2$ for this model is higher than all of the previous models.
+
+Adjusted $R^2$
+
+* Initial First Order Model = 0.8013
+* First Order Model with All Terms = 0.8324
+* Final First Order Model = 0.8324
+* Model with Interaction Terms = 0.8586
+* Recommended Model 0.8587
+
+Additionally the AIC values for the models also point towards the Recommended model as the best.
+
+```{r,echo=FALSE}
+print(AIC(initmodel))
+print(AIC(largemodel))
+print(AIC(finfirstmodel))
+print(AIC(intmodel1))
+print(AIC(intmodel2))
+```
+
+
 ### Regression Assumptions and Influential Points
+
+
 
 ## Conclusions
