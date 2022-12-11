@@ -26,7 +26,7 @@ References: https://studentloanhero.com/featured/undergrad-worries-survey/ https
 
 ## Visualizations
 
-Some initial scatterplots across the various variables can help show provide insight to some initial relationship. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass. There are some predictors where the scatterplot looks to be creating a "C" sort of shape. We will explore those variables further while also including some of those categorical variables later. The most obvious relationships are between the Math, Reading, and Writing Median SAT scores. They are all positively correlated with each other. Admission Rate also looks to have a relationship with those same three variables though it is negatively correlated.
+We started off by generating scatterplots across the various variables to help show provide insight to some initial relationships. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass of visualization. There are some predictors where the scatterplot looks to be creating a "C" shape. We will explore those variables further while also layering in some of those categorical variables later.
 
 ```{r, echo=FALSE}
 pairs(data[,c("TUITIONFEE_IN","ADM_RATE","UGDS","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = NULL)
@@ -36,7 +36,7 @@ pairs(data[,c("TUITIONFEE_IN","ADM_RATE","UGDS","INEXPFTE","AVGFACSAL","PFTFAC")
 pairs(data[,c("TUITIONFEE_IN","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], lower.panel = NULL)
 ```
 
-The plots below illustrate the impact of control on the relationship between various predictor variables and in-state tuition. It helps explain the "C" shape we were seeing in some of the earlier scatter plots. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private.
+The plots below illustrate the impact of `CONTROL` on the relationship between various predictor variables and in-state tuition. It helps explain the "C" shape we were seeing in some of the earlier scatter plots, as the difference between Public and Private schools. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private. Specifically it looks like there may be a negative relation ship between `TUITIONFEE_IN` and `ADM_RATE`, `PCTPELL`, and `PCTFLOAN` when `CONTROL` is private. It looks like there may be a postivie realtionship between `TUITIONFEE_IN`and `AVGFACSAL` and `RET_FT4` that is greater when `CONTROL` is private rather than public.
 
 ```{r, echo=FALSE}
 admscp <- data %>%
