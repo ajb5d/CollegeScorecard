@@ -1,8 +1,8 @@
 # Linear Regression
 ```{r setup, include=FALSE}
+library(MASS)
 library(tidyverse)
 library(ggpubr)
-library(MASS)
 source("load_data.R")
 ```
 
