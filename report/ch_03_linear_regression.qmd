@@ -257,7 +257,10 @@ intmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL
                   RET_FT4:CONTROL, data = data)
 summary(intmodel1)
 ```
-Once again we will conduct a partial F test to determine if the additional terms in the model are significant.
+Once again we will conduct a partial F test to determine if the additional terms in the model are significant.  
+$H_0: \beta_2 = 0$  
+$H_a: \beta_2 \neq 0$  
+where $\beta_2$ represents the coeficcients for the interaction terms.
 ```{r, echo=FALSE}
 anova(finfirstmodel,intmodel1)
 ```
@@ -288,6 +291,46 @@ ggplot(data, aes(x=tuithat,y=res))+
 ```
 The residuals look to have a mean of 0 for most of the fitted values of y but at the higher fitted values of y there looks to be an area where the mean is less then 0. In addition the variance of the residuals looks to increase as the fitted values increase. So we do not meet the first 2 regression assumptions. To attempt to correct for this we will transform the response.
 
+```{r}
+boxcox(intmodel2, lambda = seq(-1,1,1/10))
+```
+The Box-Cox plot indicates a $\lambda$ somewhat near 0. Becasue of that and to aid in interpretation we will use try using the log transformation.
+```{r}
+logtuit <- log(data$TUITIONFEE_IN)
+data <- data.frame(data,logtuit)
+```
+```{r}
+logmodel <- lm(logtuit~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
+                   PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+
+                  ADM_RATE:CONTROL+AVGFACSAL:CONTROL+PCTPELL:CONTROL, data = data)
+summary(logmodel)
+```
+
+```{r, echo=FALSE}
+logtuithat <- logmodel$fitted.values
+logres <- logmodel$residuals
+data <- data.frame(data,logtuithat,logres)
+```
+
+```{r, echo=FALSE}
+ggplot(data, aes(x=logtuithat,y=logres))+
+  geom_point()+
+  geom_hline(yintercept=0, color="red")+
+  labs(x="Fitted y", y="Residuals", title="Residual Plot")
+```
+
+With the log transformation on `TUITIONFEE_IN` the varaince of the residuals does look to be fairly constant for the fitted values. There is a chance at high fitted values (avbove 11) that there is an area where the mean of the residuals is not 0, but mostly it looks fine.
+
+```{r}
+acf(logres, main="ACF Plot of Residuals with Log Tuition")
+```
+It looks like the residuals do have some correlation with eachother as at a few different lags the autocorrelation is significant. It looks like this could possibly be because the data has been sorted by the School's names.
+
+```{r}
+qqnorm(logres)
+qqline(logres, col="red")
+```
+For the most part the residuals look to follow the normal distribution, at the lower end there is some deviation.
 
 ### Recommended Model
 
@@ -299,7 +342,8 @@ Adjusted $R^2$
 * First Order Model with All Terms = 0.8324
 * Final First Order Model = 0.8324
 * Model with Interaction Terms = 0.8586
-* Recommended Model 0.8587
+* Recommended Model = 0.8587
+* Recommended Model with Log Transform = 0.8809 
 
 Additionally the AIC values for the models also point towards the Recommended model as the best.
 
@@ -309,6 +353,7 @@ print(AIC(largemodel))
 print(AIC(finfirstmodel))
 print(AIC(intmodel1))
 print(AIC(intmodel2))
+print(AIC(logmodel))
 ```
 
 
