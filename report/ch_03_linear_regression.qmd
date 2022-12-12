@@ -4,6 +4,7 @@
 library(MASS)
 library(tidyverse)
 library(ggpubr)
+library(patchwork)
 source("load_data.R")
 ```
 
@@ -57,7 +58,7 @@ ugdsscp <- data %>%
   select(UGDS, TUITIONFEE_IN, CONTROL) %>% 
   drop_na() %>% 
   ggplot(aes(x = UGDS, y = TUITIONFEE_IN, color = CONTROL)) +
-    scale_x_continuous() + 
+    scale_x_continuous(labels = scales::label_comma()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
@@ -65,7 +66,7 @@ ugdsscp <- data %>%
       x = "Undergrad Students",
       y = "In-State Tuition",
       color = "Insitution Type"
-    ) + theme(axis.text.x = element_text(angle = 90))
+    ) + theme_bw()
 
 avgfacsalscp <- data %>%
   select(AVGFACSAL, TUITIONFEE_IN, CONTROL) %>% 
@@ -79,7 +80,7 @@ avgfacsalscp <- data %>%
       x = "Avg. Faculty Salary (USD per month)",
       y = "In-State Tuition",
       color = "Insitution Type"
-    ) + theme(axis.text.x = element_text(angle = 90))
+    ) + theme_bw()
 
 pftfacscp <- data %>%
   select(PFTFAC, TUITIONFEE_IN, CONTROL) %>% 
@@ -95,8 +96,7 @@ pftfacscp <- data %>%
       color = "Insitution Type"
     ) + theme_bw()
 
-ggarrange(admscp, ugdsscp, avgfacsalscp, pftfacscp,
-          ncol = 2, nrow = 2)
+admscp + ugdsscp + avgfacsalscp + pftfacscp + plot_layout(ncol = 2, guides = "collect") & theme(legend.position="bottom")
 ```
 
 ```{r, echo=FALSE}
@@ -112,7 +112,7 @@ pctpellscp <- data %>%
       x = "Pell Grant Rate",
       y = "In-State Tuition",
       color = "Insitution Type"
-    ) + theme_bw()
+    ) + theme_bw() 
 
 pctflscp <- data %>%
   select(PCTFLOAN, TUITIONFEE_IN, CONTROL) %>% 
@@ -140,7 +140,7 @@ retft4scp <- data %>%
       x = "First Time Undergrad Rate",
       y = "In-State Tuition",
       color = "Insitution Type"
-    ) + theme_bw()
+    ) + theme_bw() 
 
 gdmfcp <- data %>%
   select(GRAD_DEBT_MDN, TUITIONFEE_IN, CONTROL) %>% 
@@ -154,10 +154,9 @@ gdmfcp <- data %>%
       x = "Median Graduation Debt",
       y = "In-State Tuition",
       color = "Insitution Type"
-    ) + theme(axis.text.x = element_text(angle = 90))
+    ) + theme_bw()
 
-ggarrange(pctpellscp, pctflscp, retft4scp, gdmfcp,
-          ncol = 2, nrow =2)
+pctpellscp + pctflscp + retft4scp + gdmfcp + plot_layout(ncol = 2, guides = "collect") & theme(legend.position="bottom")
 ```
 
 The violin plots below compare the `TUITIONFEE_IN` against some of the categorical variables in our data: `SINGLEGENDER`, `RELIGIOULS`, and `LOCALE`. It looks like there may be some signficant difference in the distribution of `TUITIONFEE_IN` based on `SINGLE_GENDER` and `RELIGIOUS`. It's difficult to discern a major difference in `TUITIONFEE_IN` across the different levels of `LOCALE`.
@@ -196,8 +195,7 @@ locviol <- data %>%
       y = "In-State Tuition",
     ) + theme_bw()
 
-ggarrange(gendviol, relviol, locviol,
-          ncol = 2, nrow =2)
+gendviol + relviol + locviol + plot_layout(ncol = 2)
 ```
 
 ## Model Building
