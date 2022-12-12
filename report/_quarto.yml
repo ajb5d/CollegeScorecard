@@ -20,6 +20,8 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
+    geometry: 
+      - margin=0.5in
 
 
 
