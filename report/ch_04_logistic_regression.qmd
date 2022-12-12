@@ -24,7 +24,7 @@ We chose this question because:
   * Schools with high default rates can lose access to federal aid.
   * Students unable to repay their student loans can be saddled with a lifetime of debt that is difficult to discharge in bankruptcy.
   
-Avoiding default requires students to either obtain employment after graduation sufficient to make payment on their loans or place their loans in deferment while they attend additional schooling. The required payment is proportional to the amount owed. Given this, we hypothesize that the schools with high default rates will tend to be larger, less competative, privately controlled, and more expensive. 
+Avoiding default requires students to either obtain employment after graduation sufficient to make payment on their loans or place their loans in deferment while they attend additional schooling. The required payment is proportional to the amount owed. Given this, we hypothesize that the schools with high default rates will tend to be larger, less competitive, privately controlled, and more expensive. 
 
 ## Visualizations
 
@@ -43,7 +43,8 @@ data %>%
     scale_y_continuous(labels = scales::label_percent()) + 
     coord_cartesian(expand = FALSE) +
     labs(x = "Decile of Observed Value",
-         y = "Proportion of High Default Rate")
+         y = "Proportion of High Default Rate") +
+    theme(legend.position="bottom") 
 ```
 Here we examine the distribution of several continuous variables(@fig-continuous-distributions). For each panel, we divided the observed values of our variable of interest into deciles and then display the empirical proportion of high default schools. There are several interesting observations in this figure:
 
@@ -69,8 +70,9 @@ data %>%
     scale_y_continuous(labels = scales::label_percent()) + 
     coord_cartesian(expand = FALSE) +
     labs(x = "Decile of Observed Value",
-         y = "Proportion of High Default Rate")
-```
+         y = "Proportion of High Default Rate") +
+    theme(legend.position="bottom") 
+``` 
 Next, we examine the proportion of high default schools for several categorical variables (@fig-cat-distributions). We note several important observations:
 
 * *Public and Private schools have similar risks of being a high default school*. We initially hypothesized that private schools(`CONTROL`) would be more likely to be high default schools and this is unexpected.
@@ -93,7 +95,8 @@ data %>%
     scale_y_continuous(labels = scales::label_dollar()) + 
     facet_wrap(~CONTROL) +
     labs(x = "Average Faculty Salary ($/month)", y = "Tuition and Fees") + 
-    theme_bw()
+    theme_bw() + 
+    theme(legend.position="bottom") 
 ```
 ```{r}
 #| echo: false
@@ -107,7 +110,8 @@ data %>%
     scale_x_continuous(labels = scales::label_dollar()) + 
     scale_y_continuous(labels = scales::label_dollar(), trans = "log10") + 
     labs(x = "Average Faculty Salary ($/month)", y = "Instructional Expeditures per FT Student") + 
-    theme_bw()
+    theme_bw() + 
+    theme(legend.position="bottom") 
 ```
 
 Next the explore the highly correlated measures of cost. In @fig-salary-vs-tuition we see that tuition and faculty salary are strongly correlated and that many of the high default schools have lower values for both. In @fig-salary-vs-instructional we see that faculty salary and instructional costs are again strongly correlated and that many of the high default schools have lower values for both. Faculty salary may be a better predictor -- there are several schools with a high default rate where the average faculty salary is less than \$60,000 (approximately the 5th percentile for our data ) per year yet the instructional expenditures are greater than \$10,000 (approximately the median value).
@@ -144,7 +148,7 @@ summary(model)
 
 ### Improved Model
 
-From the results above, we will attempt a reduced model with six predictors: `CONTROL`, `AVGFACSAL`, `RET_FT4`, `HBCU`, `PCTPELL`, and `GRAD_DEBT_MDN`.
+From the results above, we will evaluate a reduced model with the six predictors that appear significant from our full model: `CONTROL`, `AVGFACSAL`, `RET_FT4`, `HBCU`, `PCTPELL`, and `GRAD_DEBT_MDN`.
 
 ```{r}
 #| echo: false
@@ -200,6 +204,27 @@ p2 <- ggplot(prc_data) +
 
 (p1 + p2 + plot_layout(guides = "collect") + plot_annotation(title = "Test Set Model Performance")) & theme(legend.position="bottom")  
 ```
-The AUC (0.937 vs 0.931), ROC curves, and maximal accuracy for the two candidate models is very similar(@fig-roc-curves).
+
+Reviewing @fig-roc-curves, we make several conclusions:
+
+* The AUC of both models is very similar (0.937 vs 0.931)
+* The ROC curves have a similar shape but full model consistently has a higher sensitivity at the shame specificity for values of specificity from around 60% to 90%
+* The maximal accuracy for the two candidate models is very similar and the threshold with maximal accuracy for both models is very close to 50% (Log-odds 0).
+
+Given the similar performance, we recommend using the more parsimonious model with six predictors over the full model. 
 
 ## Conclusions
+
+We initially hypothesized that schools with high default rates will tend to be larger, less competitive, privately controlled, and more expensive. We make the following conclusions from our analysis:
+
+* **School size is not associated with default rate.** After controlling for other properties, the undergraduate population was not associated with being a high default school
+* **Competitive schools (Lower `ADM_RATE`) had similar risk of being a high default school when compared to less competitive schools**. Again, our hypothesized risk factor was not associated with our outcome after controlling for other school characteristics.
+* **Private Schools had a _lower_ risk of being a high default school than public schools.** After controlling for other properties, the OR our outcome was 0.367 when compared to public schools
+* **Less expensive schools had a _higher_ risk of being a high default school than more expensive schools.** We identified that average faculty salary, instructional expenditures, and tuition cost were all correlated but that, of these three values, faculty salary was the best predictor of being a high default school. All other factors being held constant, a $1000/month increase in faculty salary was associated with a OR of 0.46 for being a high default school. The causal relationship of this exposure to our outcome is unclear, perhaps higher faculty salaries are associated with better quality instruction, leading to more educational value, leading to better post graduation job outcomes.
+* **Student resources are a important predictor of post-graduation outcomes.** We found that a higher percentage of students who qualified for means-tested scholarships (Pell Grants) was associated with increased risk of being a high default school. On average, an absolute increase in Pell grant recipients (i.e. from 10% of the students to 20% of the students) was associated with nearly double the risk of being a high default school (OR 1.98).
+* **Minoritized institutions are frequently high default schools.** In our data, HBCUs were over 20-times more likely (OR 21.83) to be a high-default institution, even after adjusting for the percentage of students receiving Pell Grants. 
+* **Schools with lower student retention are more likely to be high default schools.** A 10% absolute decrease in student retention (i.e. from 90% to 80%) was associated with a OR 1.77 for being a high default school
+* **Higher graduation debt is associated with increased risk of our outcome.** A $3,000 increase in median graduate debt was associated with an OR 1.41 for our outcome. While this is correlated with cost, highly resourced students may take no loans and students with less resources will need more loans (even at an inexpensive school).
+
+In summary, we found that high default rates were associated with both student resources (percentage of students receiving pell grants, debt at graduation) and institutional characteristics (student retention, cost). Policies based on a schools default rate should not penalize schools for admitting underprivledged students while incentivizing schools to ensure that all students succeed. 
+
