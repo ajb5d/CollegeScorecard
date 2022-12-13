@@ -10,7 +10,7 @@ source("load_data.R")
 
 ## Introduction
 
-The question for linear regression is what factors influence in-state tuition at U.S. universities. We will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting insitutions.
+The question for linear regression is what factors influence in-state tuition at U.S. universities. We will examine the factors influencing the total in-state tuition and fees for main campus, four year, degree granting institutions.
 
 Our primary response variable is `TUITIONFEE_IN` -- the total tuition and fees for in-state students in US dollars.
 
@@ -420,7 +420,7 @@ We can make the following conclusions from our analysis:
 
 * **School expenditures on students are passed along as increased tuition.** All other variables held constant a 1,000 dollar increase in instructional expenditures per full time student multiples the estimated in-state tuition by 1.0045 ($e^{4.468 \times 10^{-6} \times 1000}$).
 
-* **Schools with higher in-state tuitions have students that take out more in loans.** All other variables held constant a 1,000 dollar increase in median student debt at graduation multiples the estimated in-state tuition by 1.0179 ($e^{1.772 \times 10^{-5} \times 1000}$).
+* **Schools with higher in-state tuition have students that take out more in loans.** All other variables held constant a 1,000 dollar increase in median student debt at graduation multiples the estimated in-state tuition by 1.0179 ($e^{1.772 \times 10^{-5} \times 1000}$).
 
 * **Schools with a high percentage of Pell grant recipients have lower tuition.** For public schools all other variables held constant a 1% increase in pell grant recipients multiples the estimated tuition by 0.5456 ($e^{-6.058 \times 10^{-1}}$). For private schools all other variables held constant a 1% increase in pell grant recipients multiples the estimated tuition by 0.2182 ($e^{-6.058 \times 10^{-1} - 9.167 \times 10^{-1}}$).
 
