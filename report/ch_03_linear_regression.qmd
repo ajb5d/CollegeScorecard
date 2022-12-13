@@ -23,7 +23,7 @@ The cost of attending college is one of the [main concerns for high school stude
 With the above facts, it is important that we understand the factors that influence high tuition fees. These factors that impact the fees needs to be addressed to encourage the current and future generations can have a debt-free college education of their choice.
 
 ## Visualizations
-We started off by generating scatter plots (@fig-corr) across the various variables to help show provide insight to some initial relationships. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass of visualization. There are some predictors where the scatter plot looks to be creating a "C" shape. We will explore those variables further while also layering in some of those categorical variables later.
+We started off by generating scatter plots (@fig-corr) across the various variables to help show and provide insight to some initial relationships. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass of visualization. There are some predictors where the scatter plot looks to be creating a "C" shape. We will explore those variables further while also layering in some of those categorical variables later.
 
 ```{r, echo=FALSE}
 #| label: fig-corr
@@ -47,7 +47,7 @@ wrap_elements(ggmatrix_gtable(cor1)) / wrap_elements(ggmatrix_gtable(cor2))
 ```
 
 
-We illustrate the impact of `CONTROL` on the relationship between various predictor variables and in-state tuition(@fig-cost-by-cont) and this helps explain the "C" shape we were seeing in some of the earlier scatter plots, as the difference between Public and Private schools. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private. Specifically it looks like there may be a negative relation ship between `TUITIONFEE_IN` and `ADM_RATE`, `PCTPELL`, and `PCTFLOAN` when `CONTROL` is private. It looks like there may be a positive relationship between `TUITIONFEE_IN`and `AVGFACSAL` and `RET_FT4` that is greater when `CONTROL` is private rather than public.
+We illustrate the impact of `CONTROL` on the relationship between various predictor variables and in-state tuition(@fig-cost-by-cont) and this helps explain the "C" shape we were seeing in some of the earlier scatter plots, as the difference between Public and Private schools. It appears the estimated slopes for some of these relationships will vary depending on whether the school is public or private. Specifically it looks like there may be a negative relation ship between `TUITIONFEE_IN` and `ADM_RATE`, `PCTPELL`, and `PCTFLOAN` when `CONTROL` is private. It also looks like there may be a positive relationship between `TUITIONFEE_IN`and `AVGFACSAL` and `RET_FT4` that is greater when `CONTROL` is private rather than public.
 
 ```{r, echo=FALSE}
 #| echo: false
@@ -375,7 +375,7 @@ qqnorm(logres)
 qqline(logres, col="red")
 ```
 
-For the most part the residuals look to follow the normal distribution (@fig-qq-log), at the lower end there is some deviation, but not enough to be a major concern.
+For the most part, the residuals look to follow the normal distribution (@fig-qq-log), at the lower end there is some deviation, but not enough to be a major concern.
 
 From the 3 charts above we can conclude that the model comes close enough to meeting the regression assumptions.
 
@@ -405,7 +405,7 @@ influential_points <- data %>%
 summary(dffitsmodel)
 ```
 
-The most notable difference is that the t-tests for `RET_FT4` and `ADM_RATE` indicates that both may not be a important to the model given the presence of the other predictors without the influential data points. The estimated coefficients for the other predictors also changed but there were not changes in the signs.If we examine these influential points, we notice that most of these schools are on the extremes, including:
+The most notable difference is that the t-tests for `RET_FT4` and `ADM_RATE` indicates that both may not be a important to the model given the presence of the other predictors without the influential data points. The estimated coefficients for the other predictors also changed but there were not changes in the signs. If we examine these influential points, we notice that most of these schools are on the extremes, including:
 
 * Ivy League schools (Harvard, Stanford, Princeton) with a very low admission rate (around 5%, less than 1st percentile)
 * Schools with near 100% admission rates (Moody Bible Institute, Prescott College, Middle Georgia State University, Unity College, Criswell College)
