@@ -382,18 +382,18 @@ The recommended model is below. It includes a log transform on the response vari
 summary(logmodel)
 ```
 
-Based on both the Adjusted $R^2$ and AIC metrics the recommended model is considered the best model out of the ones we have tested. The agreement between the two measure increases our confidence in the selection of the recommended model.
+Based on both the Adjusted $R^2$ and AIC metrics (@tbl-model-metrics) the recommended model is considered the best model out of the ones we have tested. The agreement between the two measure increases our confidence in the selection of the recommended model.
 
-Adjusted R-squared
+|                                      | Adjusted $R^2$ | AIC      |
+|--------------------------------------|----------------|----------|
+|  Initial First Order Model           | 0.8013         | 29299.02 |
+| First Order Model with All Terms     |  0.8324        | 29067.13 |
+| Final First Order Model              | 0.8324         | 29062.05 |
+| Model with Interaction Terms         | 0.8586         | 28822.47 |
+| Recommended Mode                     | 0.8587         | 28822.47 |
+| Recommended Model with Log Transform | 0.8809         | 95.94833 |
 
-* Initial First Order Model = 0.8013
-* First Order Model with All Terms = 0.8324
-* Final First Order Model = 0.8324
-* Model with Interaction Terms = 0.8586
-* Recommended Model = 0.8587
-* Recommended Model with Log Transform = 0.8809
-
-AIC
+: Fit metrics for selected models {#tbl-model-metrics}
 
 ```{r,include=FALSE}
 print(AIC(initmodel))
@@ -403,26 +403,19 @@ print(AIC(intmodel1))
 print(AIC(intmodel2))
 print(AIC(logmodel))
 ```
-* Initial First Order Model = 29299.02
-* First Order Model with All Terms = 29067.13
-* Final First Order Model = 29062.05
-* Model with Interaction Terms = 28822.47
-* Recommended Model = 28822.47
-* Recommended Model with Log Transform = 95.94833
-
 
 ## Conclusions
+
 Based on our linear model we can conclude that the following predictors have a relationship with the cost of in-state tuition at U.S. universities: `AVGFACSAL`, `PCTPELL`, `RET_FT4`, `CONTROL`, `UGDS`, `PCTFLOAN`, `GRAD_DEBT_MDN`, and `RELIGIOUS`. We can also conclude that the following predictors have a different relationship to the cost of in-state tuition when `CONTROL` is public vs. private: `ADM_RATE`, `AVGFAC_SAL`, and `PCTPELL`. It should be noted that the estimated coefficients for `RET_FT4` and `ADM_RATE` are not robust to influential data points so we will delay drawing conclusions from those predictors.
 
 We can make the following conclusions from our analysis:
 
-* **Tuition at private schools is likely to be higher than public schools.** All other variables held constant a private schools estimated in-state tuition is 6.9797 ($e^{1.943}$) times that of a public school.
+-   **Tuition at private schools is likely to be higher than public schools.** All other variables held constant a private schools estimated in-state tuition is 6.9797 ($e^{1.943}$) times that of a public school.
 
-* **School expenditures on students are passed along as increased tuition.** All other variables held constant a 1,000 dollar increase in instructional expenditures per full time student multiples the estimated in-state tuition by 1.0045 ($e^{4.468 \times 10^{-6} \times 1000}$).
+-   **School expenditures on students are passed along as increased tuition.** All other variables held constant a 1,000 dollar increase in instructional expenditures per full time student multiples the estimated in-state tuition by 1.0045 ($e^{4.468 \times 10^{-6} \times 1000}$).
 
-* **Schools with higher in-state tuition have students that take out more in loans.** All other variables held constant a 1,000 dollar increase in median student debt at graduation multiples the estimated in-state tuition by 1.0179 ($e^{1.772 \times 10^{-5} \times 1000}$).
+-   **Schools with higher in-state tuition have students that take out more in loans.** All other variables held constant a 1,000 dollar increase in median student debt at graduation multiples the estimated in-state tuition by 1.0179 ($e^{1.772 \times 10^{-5} \times 1000}$).
 
-* **Schools with a high percentage of Pell grant recipients have lower tuition.** For public schools all other variables held constant a 1% increase in pell grant recipients multiples the estimated tuition by 0.5456 ($e^{-6.058 \times 10^{-1}}$). For private schools all other variables held constant a 1% increase in pell grant recipients multiples the estimated tuition by 0.2182 ($e^{-6.058 \times 10^{-1} - 9.167 \times 10^{-1}}$).
+-   **Schools with a high percentage of Pell grant recipients have lower tuition.** For public schools all other variables held constant a 1% increase in Pell grant recipients multiplies the estimated tuition by 0.5456 ($e^{-6.058 \times 10^{-1}}$). For private schools all other variables held constant a 1% increase in Pell grant recipients multiples the estimated tuition by 0.2182 ($e^{-6.058 \times 10^{-1} - 9.167 \times 10^{-1}}$).
 
-In summary we found that higher values for the following predictors are associated with higher estimated in-state tuition given other predictors are held constant: average faculty salary, instructional expenditure per student, proportion of students who received a federal student loan, and median student debt at graduation. We found that higher values for the following predictors proportion of students receiving Pell grants and the number of undergraduate degree seeking students are associated with lower estimated in-state tuition. Private schools are associated with in-state tuition when compared to public schools given other predictors are held constant. Religious schools are associated with lower in-state tuition compare to secular schools all other predictors held constant. We found that the relationship between estimated in-state tuition differs for average faculty salary and proportion of pell grant recipients when the school is private versus when they are public.
-
+In summary we found that higher values for the following predictors are associated with higher estimated in-state tuition given other predictors are held constant: average faculty salary, instructional expenditure per student, proportion of students who received a federal student loan, and median student debt at graduation. We found that higher values for the following predictors proportion of students receiving Pell grants and the number of undergraduate degree seeking students are associated with lower estimated in-state tuition. Private schools are associated with in-state tuition when compared to public schools given other predictors are held constant. Religious schools are associated with lower in-state tuition compare to secular schools all other predictors held constant. We found that the relationship between estimated in-state tuition differs for average faculty salary and proportion of Pell grant recipients when the school is private versus when they are public.
