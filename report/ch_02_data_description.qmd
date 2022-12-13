@@ -70,8 +70,6 @@ Our data comes from the [US Department of Education College Scorecard](https://c
 
 ## Variables
 
-
-
 ```{r}
 #| output: asis
 #| echo: false
