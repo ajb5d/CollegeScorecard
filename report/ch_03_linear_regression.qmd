@@ -411,8 +411,6 @@ print(AIC(logmodel))
 * Recommended Model with Log Transform = 95.94833
 
 
-### Regression Assumptions and Influential Points
-
 ## Conclusions
 Based on our linear model we can conclude that the following predictors have a relationship with the cost of in-state tuition at U.S. universities: `AVGFACSAL`, `PCTPELL`, `RET_FT4`, `CONTROL`, `UGDS`, `PCTFLOAN`, `GRAD_DEBT_MDN`, and `RELIGIOUS`. We can also conclude that the following predictors have a different relationship to the cost of in-state tuition when `CONTROL` is public vs. private: `ADM_RATE`, `AVGFAC_SAL`, and `PCTPELL`.
 
