@@ -22,6 +22,7 @@ format:
     documentclass: scrreprt
     geometry: 
       - margin=0.5in
+    fontsize: 10pt
 
 
 
