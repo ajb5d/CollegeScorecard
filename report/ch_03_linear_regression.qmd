@@ -3,7 +3,7 @@
 ```{r setup, include=FALSE}
 library(MASS)
 library(tidyverse)
-library(ggpubr)
+library(GGally)
 library(patchwork)
 source("load_data.R")
 ```
@@ -27,17 +27,31 @@ References: https://studentloanhero.com/featured/undergrad-worries-survey/ https
 
 ## Visualizations
 
-We started off by generating scatterplots across the various variables to help show provide insight to some initial relationships. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass of visualization. There are some predictors where the scatterplot looks to be creating a "C" shape. We will explore those variables further while also layering in some of those categorical variables later.
+We started off by generating scatter plots (@fig-corr) across the various variables to help show provide insight to some initial relationships. None of the predictor variables display an obvious linear relation ship to in-state tuition during this first pass of visualization. There are some predictors where the scatter plot looks to be creating a "C" shape. We will explore those variables further while also layering in some of those categorical variables later.
 
 ```{r, echo=FALSE}
-pairs(data[,c("TUITIONFEE_IN","ADM_RATE","UGDS","INEXPFTE","AVGFACSAL","PFTFAC")], lower.panel = NULL)
+#| label: fig-corr
+#| fig-height: 10
+#| fig-width: 7.5
+#| fig-cap: "Correlations of Continuous Variables"
+
+custom_theme <- theme_bw() + theme(
+  axis.text = element_text(size = 6),
+  strip.text.x = element_text(size = 6),
+  strip.text.y = element_text(size = 6))
+
+cor1 <- ggpairs(data[,c("TUITIONFEE_IN","ADM_RATE","UGDS","INEXPFTE","AVGFACSAL","PFTFAC")], 
+                lower = list(continuous = wrap("points", size = 0.1, alpha = 0.3)),
+                progress = FALSE) + custom_theme
+cor2 <- ggpairs(data[,c("TUITIONFEE_IN","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], 
+                lower = list(continuous = wrap("points", size = 0.1, alpha = 0.3)),
+                progress = FALSE) + custom_theme
+
+wrap_elements(ggmatrix_gtable(cor1)) / wrap_elements(ggmatrix_gtable(cor2))
 ```
 
-```{r, echo=FALSE}
-pairs(data[,c("TUITIONFEE_IN","PCTPELL","PCTFLOAN","RET_FT4","GRAD_DEBT_MDN")], lower.panel = NULL)
-```
 
-Here we illustrate the impact of `CONTROL` on the relationship between various predictor variables and in-state tuition(@fig-cost-by-cont). It helps explain the "C" shape we were seeing in some of the earlier scatter plots, as the difference between Public and Private schools. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private. Specifically it looks like there may be a negative relation ship between `TUITIONFEE_IN` and `ADM_RATE`, `PCTPELL`, and `PCTFLOAN` when `CONTROL` is private. It looks like there may be a postivie realtionship between `TUITIONFEE_IN`and `AVGFACSAL` and `RET_FT4` that is greater when `CONTROL` is private rather than public.
+We illustrate the impact of `CONTROL` on the relationship between various predictor variables and in-state tuition(@fig-cost-by-cont) and this helps explain the "C" shape we were seeing in some of the earlier scatter plots, as the difference between Public and Private schools. It looks like the estimated slopes for some of these relationships will vary depending on whether the school is public or private. Specifically it looks like there may be a negative relation ship between `TUITIONFEE_IN` and `ADM_RATE`, `PCTPELL`, and `PCTFLOAN` when `CONTROL` is private. It looks like there may be a positive relationship between `TUITIONFEE_IN`and `AVGFACSAL` and `RET_FT4` that is greater when `CONTROL` is private rather than public.
 
 ```{r, echo=FALSE}
 #| echo: false
@@ -53,7 +67,7 @@ admscp <- data %>%
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Tuition vs. Admission Rate",
+      subtitle = "Tuition vs. Admission Rate",
       x = "Admission Rate",
       y = "In-State Tuition",
       color = "Insitution Type"
@@ -67,7 +81,7 @@ ugdsscp <- data %>%
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Tuition vs. Undergrad Students",
+      subtitle = "Tuition vs. Undergrad Students",
       x = "Undergrad Students",
       y = "In-State Tuition",
       color = "Insitution Type"
@@ -81,7 +95,7 @@ avgfacsalscp <- data %>%
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Tuition vs. Average Faculty Salary",
+      subtitle = "Tuition vs. Average Faculty Salary",
       x = "Avg. Faculty Salary (USD per month)",
       y = "In-State Tuition",
       color = "Insitution Type"
@@ -95,7 +109,7 @@ pftfacscp <- data %>%
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
     labs(
-      title = "Tuition vs. Full Time Faculty",
+      subtitle = "Tuition vs. Full Time Faculty",
       x = "Percentage Full Time Faculty",
       y = "In-State Tuition",
       color = "Insitution Type"
@@ -160,16 +174,19 @@ gdmfcp <- data %>%
 admscp + ugdsscp + avgfacsalscp + pftfacscp + pctpellscp + pctflscp + retft4scp + gdmfcp + plot_layout(ncol = 2, guides = "collect") & theme(legend.position="bottom")
 ```
 
-The violin plots below compare the `TUITIONFEE_IN` against some of the categorical variables in our data: `SINGLEGENDER`, `RELIGIOULS`, and `LOCALE`. It looks like there may be some signficant difference in the distribution of `TUITIONFEE_IN` based on `SINGLE_GENDER` and `RELIGIOUS`. It's difficult to discern a major difference in `TUITIONFEE_IN` across the different levels of `LOCALE`.
+We also compared the `TUITIONFEE_IN` against some of the categorical variables in our data: `SINGLEGENDER`, `RELIGIOULS`, and `LOCALE`(@fig-cost-by-cat). It looks like there may be some significant difference in the distribution of `TUITIONFEE_IN` based on `SINGLE_GENDER` and `RELIGIOUS`. It's difficult to discern a major difference in `TUITIONFEE_IN` across the different levels of `LOCALE`.
 
 ```{r, echo=FALSE}
+#| echo: false
+#| label: fig-cost-by-cat
+#| fig-cap: "Tuition versus Categorical Variables"
 gendviol <- data %>%
   select(SINGLEGENDER, TUITIONFEE_IN, CONTROL) %>% 
   drop_na() %>%
   ggplot(., aes(x = SINGLEGENDER, y = TUITIONFEE_IN)) +
     geom_violin() +
     labs(
-      title = "Tuition vs. Single Gender Schools",
+      subtitle = "Tuition vs. Single Gender Schools",
       x = "Single Gender",
       y = "In-State Tuition",
     ) + theme_bw()
@@ -180,7 +197,7 @@ relviol <- data %>%
   ggplot(., aes(x = RELIGIOUS, y = TUITIONFEE_IN)) +
     geom_violin() +
     labs(
-      title = "Tuition vs. Religous Schools",
+      subtitle = "Tuition vs. Religous Schools",
       x = "Single Gender",
       y = "In-State Tuition",
     ) + theme_bw()
@@ -191,7 +208,7 @@ locviol <- data %>%
   ggplot(., aes(x = LOCALE, y = TUITIONFEE_IN)) +
     geom_violin() +
     labs(
-      title = "Tuition vs. School Locale",
+      subtitle = "Tuition vs. School Locale",
       x = "Locale",
       y = "In-State Tuition",
     ) + theme_bw()
