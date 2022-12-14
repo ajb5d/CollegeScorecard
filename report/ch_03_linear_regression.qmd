@@ -430,7 +430,7 @@ Based on both the Adjusted $R^2$ and AIC metrics (@tbl-model-metrics) the recomm
 | First Order Model with All Terms     |  0.8324        | 29067.13 |
 | Final First Order Model              | 0.8324         | 29062.05 |
 | Model with Interaction Terms         | 0.8586         | 28822.47 |
-| Recommended Mode                     | 0.8587         | 28822.47 |
+| Recommended Model                    | 0.8587         | 28822.47 |
 | Recommended Model with Log Transform | 0.8809         | 95.94833 |
 
 : Fit metrics for selected models {#tbl-model-metrics}
