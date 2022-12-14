@@ -328,7 +328,7 @@ The residuals (@fig-residual-model-2) look to have a mean of 0 for most of the f
 boxcox(intmodel2, lambda = seq(-1,1,1/10))
 ```
 
-The Box-Cox plot (@fig-boxcox) indicates a $\lambda$ somewhat near 0. Because of that and to aid in interpretation we will use try using the log transformation.
+The Box-Cox plot (@fig-boxcox) indicates a $\lambda$ somewhat near 0. Because of that and to aid in interpretation we will use the log transformation.
 
 ```{r, echo=FALSE}
 logtuit <- log(data$TUITIONFEE_IN)
