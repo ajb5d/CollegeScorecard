@@ -62,6 +62,7 @@ admscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Admission Rate",
       x = "Admission Rate",
@@ -76,6 +77,7 @@ ugdsscp <- data %>%
     scale_x_continuous(labels = scales::label_comma()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Undergrad Students",
       x = "Undergrad Students",
@@ -90,6 +92,7 @@ avgfacsalscp <- data %>%
     scale_x_continuous(labels = scales::label_dollar()) +
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Average Faculty Salary",
       x = "Avg. Faculty Salary (USD per month)",
@@ -104,6 +107,7 @@ pftfacscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) +
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Full Time Faculty",
       x = "Percentage Full Time Faculty",
@@ -119,6 +123,7 @@ pctpellscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Percent Pell Grant",
       x = "Pell Grant Rate",
@@ -133,6 +138,7 @@ pctflscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Percent Student Loan",
       x = "Student Loan Rate",
@@ -147,6 +153,7 @@ retft4scp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Rate First Time Undergrads",
       x = "First Time Undergrad Rate",
@@ -161,6 +168,7 @@ gdmfcp <- data %>%
     scale_x_continuous(labels = scales::label_dollar()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
     labs(
       subtitle = "Tuition vs. Median Graduation Debt",
       x = "Median Graduation Debt",
@@ -456,6 +464,6 @@ We can make the following conclusions from our analysis:
 
 -   **Schools with higher in-state tuition have students that take out more in loans.** All other variables held constant a 1,000 dollar increase in median student debt at graduation multiples the estimated in-state tuition by 1.0179 ($e^{1.772 \times 10^{-5} \times 1000}$).
 
--   **Schools with a high percentage of Pell grant recipients have lower tuition.** For public schools all other variables held constant a 1% increase in Pell grant recipients multiplies the estimated tuition by 0.5456 ($e^{-6.058 \times 10^{-1}}$). For private schools all other variables held constant a 1% increase in Pell grant recipients multiples the estimated tuition by 0.2182 ($e^{-6.058 \times 10^{-1} - 9.167 \times 10^{-1}}$).
+-   **Schools with a high percentage of Pell grant recipients have lower tuition.** For public schools all other variables held constant a 1% increase in Pell grant recipients multiplies the estimated tuition by 0.9939 ($e^{-6.058 \times 10^{-1} \times 0.01}$). For private schools all other variables held constant a 1% increase in Pell grant recipients multiples the estimated tuition by 0.9849 ($e^{-6.058 \times 10^{-1} - 9.167 \times 10^{-1} \times 0.01}$).
 
 In summary we found that higher values for the following predictors are associated with higher estimated in-state tuition given other predictors are held constant: average faculty salary, instructional expenditure per student, proportion of students who received a federal student loan, and median student debt at graduation. We found that higher values for the following predictors proportion of students receiving Pell grants and the number of undergraduate degree seeking students are associated with lower estimated in-state tuition. Private schools are associated with in-state tuition when compared to public schools given other predictors are held constant. Religious schools are associated with lower in-state tuition compare to secular schools all other predictors held constant. We found that the relationship between estimated in-state tuition differs for average faculty salary and proportion of Pell grant recipients when the school is private versus when they are public.
