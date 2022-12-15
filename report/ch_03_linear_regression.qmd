@@ -30,6 +30,8 @@ We started off by generating scatter plots (@fig-corr) across the various variab
 #| fig-height: 10
 #| fig-width: 7.5
 #| fig-cap: "Correlations of Continuous Variables"
+#| message: false
+#| warning: false
 
 custom_theme <- theme_bw() + theme(
   axis.text = element_text(size = 6),
@@ -55,6 +57,7 @@ We illustrate the impact of `CONTROL` on the relationship between various predic
 #| label: fig-cost-by-cont
 #| fig-height: 10
 #| fig-width: 7.5
+
 admscp <- data %>%
   select(ADM_RATE, TUITIONFEE_IN, CONTROL) %>% 
   drop_na() %>% 
@@ -62,7 +65,7 @@ admscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Admission Rate",
       x = "Admission Rate",
@@ -77,7 +80,7 @@ ugdsscp <- data %>%
     scale_x_continuous(labels = scales::label_comma()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Undergrad Students",
       x = "Undergrad Students",
@@ -92,7 +95,7 @@ avgfacsalscp <- data %>%
     scale_x_continuous(labels = scales::label_dollar()) +
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Average Faculty Salary",
       x = "Avg. Faculty Salary (USD per month)",
@@ -107,7 +110,7 @@ pftfacscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) +
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Full Time Faculty",
       x = "Percentage Full Time Faculty",
@@ -123,7 +126,7 @@ pctpellscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Percent Pell Grant",
       x = "Pell Grant Rate",
@@ -138,7 +141,7 @@ pctflscp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Percent Student Loan",
       x = "Student Loan Rate",
@@ -153,7 +156,7 @@ retft4scp <- data %>%
     scale_x_continuous(labels = scales::label_percent()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Rate First Time Undergrads",
       x = "First Time Undergrad Rate",
@@ -168,7 +171,7 @@ gdmfcp <- data %>%
     scale_x_continuous(labels = scales::label_dollar()) + 
     scale_y_continuous(labels = scales::label_dollar()) + 
     geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(
       subtitle = "Tuition vs. Median Graduation Debt",
       x = "Median Graduation Debt",
@@ -242,7 +245,7 @@ summary(initmodel)
 ### Improved Model
 
 After creating the initial first order model based on observations from the plots displayed earlier we will compare it to a model that contains the remaining predictors we obtained data on to ensure we weren't missing any important ones.
-
+\newpage
 ```{r, echo=FALSE}
 largemodel <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL+UGDS+INEXPFTE+
                    PFTFAC+PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+SINGLEGENDER+LOCALE, data = data)
@@ -282,6 +285,7 @@ For this partial F-test the p-value is greater than 0.05 indicating they the dat
 
 After creating a first order model we will attempt to improve it using interaction terms with CONTROL. The interaction terms were selected based off of the scatter plots shown previously.
 
+\newpage
 ```{r, echo=FALSE}
 intmodel1 <- lm(TUITIONFEE_IN~ADM_RATE+AVGFACSAL+PCTPELL+RET_FT4+CONTROL
                 +UGDS+INEXPFTE+PCTFLOAN+GRAD_DEBT_MDN+RELIGIOUS+

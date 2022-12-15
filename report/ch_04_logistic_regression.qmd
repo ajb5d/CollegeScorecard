@@ -140,7 +140,7 @@ For our initial model, we chose to include:
    * `RELIGIOUS`  based on our univariate analysis
    * `ADM_RATE` based on our hypothesis
    * `SINGLEGENDER`  based on our univariate analysis
-
+   
 ```{r}
 #| echo: false
 summary(model)

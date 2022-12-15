@@ -1,37 +1,20 @@
 # Executive Summary
-
 The high cost of tuition is one of the biggest concerns for students looking to complete their undergraduate studies in the United States. Tuition and fees have significantly increased over the past decade which resulted in increased student loans. With higher tuition rates and less students in Undergraduate programs, we can see a rise in unemployment and student debt, and a decrease in earnings and economic growth. As higher education can play a large part in overall national economic growth, it’s important to identify which variables influence high tuition and the ability to repay student loans to encourage current and future generations to plan for affordable and debt-free higher education. Our data identifies the different factors that are associated with in-state tuition and default rates among 4-year degree granting undergraduate institutions for the 2020-2021 school year. 
 
 For our first question, we sought to evaluate predictors of undergraduate tuition. These are some of the conclusions we were able to draw from the analysis: 
 
- 
-
-- Tuition at private schools is likely to be higher than public schools.  
-
-- School expenditures on students are passed along as increased tuition.  
-
-- Schools with higher in-state tuition have students that take out more in loans.   
-
-- Schools with a high percentage of Pell grant recipients have lower tuition, and the relationship between them differs between public and private schools. 
-
- 
+- Tuition at private schools is likely to be higher than public schools.
+- School expenditures on students are passed along as increased tuition.
+- Schools with higher in-state tuition have students that take out more in loans.
+- Schools with a high percentage of Pell grant recipients have lower tuition, and the relationship between them differs between public and private schools.
 
 For our second question, we evaluated predictors of schools with a high student loan default rate, from our analysis we drew the following conclusions: 
 
- 
-
-- School size is not associated with default rate.  
-
-- Competitive schools (schools with a lower admission rate) had a similar risk of being a high default school when compared to less competitive schools.  
-
-- Private Schools had a _lower risk_ of being a high default school than public schools. 
-
-- Less expensive schools had a _higher risk_ of being a high default school than more expensive schools. 
-
-- Student resources are an important predictor of post-graduation outcomes. 
-
-- Minoritized institutions are frequently high default schools. 
-
-- Schools with lower student retention are more likely to be high default schools. 
-
-- Higher graduation debt is associated with increased risk of our outcome.  
+- School size is not associated with default rate.
+- Competitive schools (schools with a lower admission rate) had a similar risk of being a high default school when compared to less competitive schools.
+- Private Schools had a _lower risk_ of being a high default school than public schools.
+- Less expensive schools had a _higher risk_ of being a high default school than more expensive schools.
+- Student resources are an important predictor of post-graduation outcomes.
+- Minoritized institutions are frequently high default schools.
+- Schools with lower student retention are more likely to be high default schools.
+- Higher graduation debt is associated with increased risk of our outcome.
