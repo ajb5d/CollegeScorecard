@@ -55,3 +55,37 @@ fig <- data %>%
   theme(legend.position="bottom") 
 
 ggsave(plot = fig, filename = "fig-lr-3.png", width = 12, height = 5.5)
+
+model_improved <- glm(HIGH_CDR ~ CONTROL + AVGFACSAL + RET_FT4 +  HBCU + PCTPELL + GRAD_DEBT_MDN, family = binomial(), data = train)
+
+roc_improved <- roc(HIGH_CDR ~ predict(model_improved, test), data = test, direction = "<", levels = c(FALSE, TRUE))
+fmt <- scales::label_number(accuracy=0.001)
+
+plot_txt <- " Model AUROC: {fmt(roc_improved$auc)}"
+
+roc_data <- roc_improved %>%
+    coords %>% 
+    mutate(specificity = 1 - specificity) %>%
+    arrange(sensitivity, specificity) %>%
+    mutate(model = "Improved")
+
+prc_data <- roc_improved %>%
+    coords(ret = c("accuracy", "threshold", "precision", "recall")) %>% 
+    mutate(model = "Improved")
+
+p1 <- ggplot(roc_data) +
+  geom_step(aes(specificity, sensitivity, color = model)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  annotate("text", x = 0.50, y = 0.1, label = glue(plot_txt)) + 
+  coord_cartesian(expand = FALSE) +
+  labs(x = "1 - Specificity", y = "Sensitivity", color = "Model") +
+  theme_bw()
+
+p2 <- ggplot(prc_data) +
+  geom_step(aes(threshold, accuracy, color = model)) +
+  scale_y_continuous(limits = c(0,1), labels = scales::label_percent()) + 
+  labs(x = "Threshold (Log-odds)", y="Accuracy", color = "Model") +
+  theme_bw()
+
+fig <- (p1 + p2 + plot_layout(guides = "collect") + plot_annotation(title = "Test Set Model Performance")) & theme(legend.position="bottom")  
+ggsave(plot = fig, filename = "fig-lr-4.png", width = 12, height = 5.5)
