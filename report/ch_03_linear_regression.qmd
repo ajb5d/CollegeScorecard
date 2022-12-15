@@ -460,7 +460,7 @@ We can make the following conclusions from our analysis:
 
 -   **Tuition at private schools is likely to be higher than public schools.** All other variables held constant a private schools estimated in-state tuition is 6.9797 ($e^{1.943}$) times that of a public school.
 
--   **School expenditures on students are passed along as increased tuition.** All other variables held constant a 1,000 dollar increase in instructional expenditures per full time student multiples the estimated in-state tuition by 1.0045 ($e^{4.468 \times 10^{-6} \times 1000}$).
+-   **High instructional expenditures are associated with higher tuition.** All other variables held constant a 1,000 dollar increase in instructional expenditures per full time student multiples the estimated in-state tuition by 1.0045 ($e^{4.468 \times 10^{-6} \times 1000}$).
 
 -   **Schools with higher in-state tuition have students that take out more in loans.** All other variables held constant a 1,000 dollar increase in median student debt at graduation multiples the estimated in-state tuition by 1.0179 ($e^{1.772 \times 10^{-5} \times 1000}$).
 
